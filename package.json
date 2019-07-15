@@ -20,6 +20,9 @@
     "url": "https://github.com/northcoders/be-nc-news/issues"
   },
   "homepage": "https://github.com/northcoders/be-nc-news#readme",
-  "dependencies": {},
+  "dependencies": {
+    "knex": "^0.19.0",
+    "pg": "^7.11.0"
+  },
   "devDependencies": {}
 }
