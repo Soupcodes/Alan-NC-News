@@ -2,7 +2,7 @@ exports.up = function(connectToDB) {
   return connectToDB.schema.createTable("articles", articlesTable => {
     articlesTable.increments("article_id").primary();
     articlesTable.string("title");
-    articlesTable.string("body");
+    articlesTable.string("body", 10000);
     articlesTable.integer("votes").defaultTo(0);
     articlesTable
       .string("topic")

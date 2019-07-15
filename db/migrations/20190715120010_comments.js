@@ -1,6 +1,9 @@
 exports.up = function(connectToDB) {
   return connectToDB.schema.createTable("comments", commentsTable => {
-    commentsTable.increments("comment_id").primary();
+    commentsTable
+      .increments("comment_id")
+      .primary()
+      .unsigned();
     commentsTable
       .string("author")
       .references("username")
@@ -8,10 +11,11 @@ exports.up = function(connectToDB) {
     commentsTable
       .integer("article_id")
       .references("article_id")
-      .inTable("articles");
+      .inTable("articles")
+      .unsigned();
     commentsTable.integer("votes").defaultTo(0);
     commentsTable.timestamp("created_at").defaultTo(connectToDB.fn.now());
-    commentsTable.string("body");
+    commentsTable.string("body", 750);
   });
 };
 
