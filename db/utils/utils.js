@@ -16,7 +16,6 @@ exports.makeRefObj = articles => {
 };
 
 exports.formatComments = (articleRef, comments) => {
-  if (!comments.length) return [];
   return comments.map(comment => {
     const commentCopy = { ...comment };
     commentCopy.article_id = articleRef[comment.belongs_to];
