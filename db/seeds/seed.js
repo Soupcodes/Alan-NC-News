@@ -17,15 +17,22 @@ exports.seed = function(connectTo) {
     .then(() => {
       return Promise.all([topicsInsertions, usersInsertions]);
     })
-    .then(() => {
-      const formattedArticles = formatDates(articleData);
-      return connectTo
-        .insert(formattedArticles)
-        .into("articles")
-        .returning("*");
-    })
-    .then(articleRows => {
-      // console.log(articleRows);
+        .then(() => {
+          const formattedArticles = formatDates(articleData);
+          return connectTo
+            .insert(formattedArticles)
+            .into("articles")
+            .returning("*");
+        })
+        .then(articleRows => {
+          const articleRefObj = makeRefObj(articleRows);
+          console.log(articleRows);
+          const formattedComments = formatComments(articleRefObj, commentData);
+          return connectTo
+            .insert(formattedComments)
+            .into("comments")
+            .returning("*")
+            .then(console.log);
 
       /* 
   
@@ -35,9 +42,5 @@ exports.seed = function(connectTo) {
       
       You will need to write and test the provided makeRefObj and formatComments utility functions to be able insert your comment data.
       */
-
-      const articleRef = makeRefObj(articleRows);
-      const formattedComments = formatComments(commentData, articleRef);
-      return connectTo("comments").insert(formattedComments);
     });
 };
