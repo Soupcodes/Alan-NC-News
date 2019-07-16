@@ -52,49 +52,144 @@ describe("/API", () => {
   });
 
   describe("/ARTICLES", () => {
-    it("GET /:article_id will connect to the article_id endpoint and return the article corresponding with the id", () => {
-      return request(app)
-        .get("/api/articles/1")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.article).to.have.keys(
-            "author",
-            "title",
-            "article_id",
-            "body",
-            "topic",
-            "created_at",
-            "votes",
-            "comment_count"
-          );
+    describe("/:ARTICLE_ID", () => {
+      it("GET /:article_id will connect to the article_id endpoint and return the article corresponding with the id", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.article).to.have.keys(
+              "author",
+              "title",
+              "article_id",
+              "body",
+              "topic",
+              "created_at",
+              "votes",
+              "comment_count"
+            );
+          });
+      });
+      it("GET /:article_id will create a comment_count key and default to 0 if there are no comments yet associated with the article", () => {
+        return request(app)
+          .get("/api/articles/2")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.article.comment_count).to.equal(0);
+          });
+      });
+      it("GET /:article_id will return a status 404 and error message if no article is found", () => {
+        return request(app)
+          .get("/api/articles/100")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Article not found");
+            expect(body.status).to.equal(404);
+          });
+      });
+      it("PATCH /:article_id accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the article gets updated by and responds with a status 201 and the updated article", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: 1 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.msg).to.eql({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              body: "I find this existence challenging",
+              votes: 101,
+              topic: "mitch",
+              author: "butter_bridge",
+              created_at: "2018-11-15T12:21:54.171Z"
+            });
+            expect(body.status).to.equal(200);
+          });
+      });
+      it("PATCH /:article_id will accept a negative newVote value and responds with a status 201 and the updated article", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: -100 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.msg).to.eql({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              body: "I find this existence challenging",
+              votes: 0,
+              topic: "mitch",
+              author: "butter_bridge",
+              created_at: "2018-11-15T12:21:54.171Z"
+            });
+            expect(body.status).to.equal(200);
+          });
+      });
+      it("PATCH /:article_id will return a status 400 and an bad request error message when the format of the value of inc_votes is not a number", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: "1" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Type error, please check your input");
+            expect(body.status).to.equal(400);
+          });
+      });
+      it("PATCH /:article_id will return a status 404 and a not found error message when the article_id being accessed doesn't exist", () => {
+        return request(app)
+          .patch("/api/articles/100")
+          .send({ inc_votes: 1 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("Article not found");
+            expect(body.status).to.equal(404);
+          });
+      });
+      describe.only("/COMMENTS", () => {
+        it("POST", () => {});
+        it("GET /:article_id/comments will return a status 200 and an array of comments for the specified article_id", () => {
+          return request(app)
+            .get("/api/articles/1/comments")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.status).to.equal(200);
+              expect(body.msg[0]).to.have.keys(
+                "article_id",
+                "comment_id",
+                "votes",
+                "created_at",
+                "author",
+                "body"
+              );
+              expect(body.msg[0].article_id).to.equal(1);
+            });
         });
-    });
-    it("GET /:article_id will create a comment_count key and default to 0 if there are no comments yet associated with the article", () => {
-      return request(app)
-        .get("/api/articles/2")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.article.comment_count).to.equal(0);
+        it("GET /:article_id/comments will return a status 200 and an array of empty comment details for an article_id that exists but has no comments", () => {
+          return request(app)
+            .get("/api/articles/2/comments")
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.status).to.equal(200);
+              expect(body.msg[0]).to.have.keys(
+                "article_id",
+                "comment_id",
+                "votes",
+                "created_at",
+                "author",
+                "body"
+              );
+              expect(body.msg[0].article_id).to.equal(2);
+              expect(body.msg.length).to.equal(1);
+            });
         });
-    });
-    it("GET /:article_id will return a status 404 and error message if no article is found", () => {
-      return request(app)
-        .get("/api/articles/100")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("Article not found");
-          expect(body.status).to.equal(404);
+        it("GET /:article_id/comments will return a status 404 and an error message if attempting to get comments for an article_id that doesn't exist", () => {
+          return request(app)
+            .get("/api/articles/100/comments")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.status).to.equal(404);
+              expect(body.msg).to.equal("Article not found");
+            });
         });
-    });
-    it("PATCH /:article_id will accept an object in the form { inc_votes: newVote }whereby 'newVote' will indicate how many votes the database needs to be updated by and responds with a status 201 and the updated article", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ inc_votes: 1 })
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.msg).to.equal();
-          expect(body.status).to.equal(200);
-        });
+      });
     });
   });
 });
