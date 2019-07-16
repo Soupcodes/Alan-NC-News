@@ -57,7 +57,7 @@ describe("/API", () => {
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
-          expect(body.article[0]).to.have.keys(
+          expect(body.article).to.have.keys(
             "author",
             "title",
             "article_id",
@@ -67,6 +67,33 @@ describe("/API", () => {
             "votes",
             "comment_count"
           );
+        });
+    });
+    it("GET /:article_id will create a comment_count key and default to 0 if there are no comments yet associated with the article", () => {
+      return request(app)
+        .get("/api/articles/2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article.comment_count).to.equal(0);
+        });
+    });
+    it("GET /:article_id will return a status 404 and error message if no article is found", () => {
+      return request(app)
+        .get("/api/articles/100")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("Article not found");
+          expect(body.status).to.equal(404);
+        });
+    });
+    it("PATCH /:article_id will accept an object in the form { inc_votes: newVote }whereby 'newVote' will indicate how many votes the database needs to be updated by and responds with a status 201 and the updated article", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.msg).to.equal();
+          expect(body.status).to.equal(200);
         });
     });
   });
