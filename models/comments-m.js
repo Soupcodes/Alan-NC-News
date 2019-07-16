@@ -21,4 +21,13 @@ const selectCommentsByArticleId = article_id => {
     });
 };
 
-module.exports = { selectCommentsByArticleId };
+const insertCommentByArticleId = ({ username, body }) => {
+  const author = username;
+  const formattedComment = { author, body };
+  return connection
+    .insert(formattedComment)
+    .into("comments")
+    .returning("body");
+};
+
+module.exports = { selectCommentsByArticleId, insertCommentByArticleId };

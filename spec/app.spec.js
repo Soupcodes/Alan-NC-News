@@ -144,7 +144,33 @@ describe("/API", () => {
           });
       });
       describe.only("/COMMENTS", () => {
-        it("POST", () => {});
+        it("POST will return a status 201 and respond with the body of the posted comment", () => {
+          return request(app)
+            .post("/api/articles/1/comments")
+            .send({
+              username: "butter_bridge",
+              body: "I can't see the light behind the shadow!"
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.msg).to.equal(
+                "I can't see the light behind the shadow!"
+              );
+            });
+        });
+        it("POST will return a status 400 and a bad request error message when posting a comment where the username is not in string format", () => {
+          return request(app)
+            .post("/api/articles/1/comments")
+            .send({
+              username: 123,
+              body: "I can't see the light behind the shadow!"
+            })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.status).to.equal(400);
+              expect(body.msg).to.equal("Invalid username input");
+            });
+        });
         it("GET /:article_id/comments will return a status 200 and an array of comments for the specified article_id", () => {
           return request(app)
             .get("/api/articles/1/comments")
