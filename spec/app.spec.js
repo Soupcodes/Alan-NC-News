@@ -32,22 +32,24 @@ describe("/API", () => {
   });
 
   describe("/USERS", () => {
-    it("GET /:username will connect to the username endpoint and return a user object with all their properties", () => {
-      return request(app)
-        .get("/api/users/lurker")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.user[0]).to.have.keys("username", "avatar_url", "name");
-        });
-    });
-    it("GET /non-existent-user will return a status 404 and an error message", () => {
-      return request(app)
-        .get("/api/users/soup")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("User not found");
-          expect(body.status).to.equal(404);
-        });
+    describe("/:USERNAME", () => {
+      it("GET /:username will connect to the username endpoint and return a user object with all their properties", () => {
+        return request(app)
+          .get("/api/users/lurker")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.user[0]).to.have.keys("username", "avatar_url", "name");
+          });
+      });
+      it("GET /non-existent-user will return a status 404 and an error message", () => {
+        return request(app)
+          .get("/api/users/soup")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("User not found");
+            expect(body.status).to.equal(404);
+          });
+      });
     });
   });
 
@@ -143,7 +145,7 @@ describe("/API", () => {
             expect(body.status).to.equal(404);
           });
       });
-      describe.only("/COMMENTS", () => {
+      describe("/COMMENTS", () => {
         it("POST will return a status 201 and respond with the body of the posted comment", () => {
           return request(app)
             .post("/api/articles/1/comments")

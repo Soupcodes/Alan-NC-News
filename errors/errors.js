@@ -12,7 +12,7 @@ exports.customErrors = (err, req, res, next) => {
 
 exports.sqlErrors = (err, req, res, next) => {
   if (err.code === "23503") {
-    res.status(404).send({ status: 404, msg: "Invalid username input" });
+    res.status(400).send({ status: 400, msg: "Invalid username input" });
   }
 };
 
