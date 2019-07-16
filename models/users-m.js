@@ -4,7 +4,14 @@ const selectUser = username => {
   return connection
     .select("*")
     .from("users")
-    .where({ username });
+    .where({ username })
+    .then(user => {
+      if (!user.length) {
+        return Promise.reject({ status: 404, msg: "User not found" });
+      } else {
+        return user;
+      }
+    });
 };
 
 module.exports = { selectUser };

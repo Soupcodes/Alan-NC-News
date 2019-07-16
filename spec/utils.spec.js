@@ -9,12 +9,12 @@ describe("formatDates", () => {
   it("will take an empty array of objects and return a new empty array", () => {
     expect(formatDates([])).to.eql([]);
   });
-  it("will take an array with an article object containing the incorrect timestamp format and convert it into a javascript readable date object", () => {
+  it("will take an array with an article object with an incorrect timestamp format and convert it into a javascript readable date object", () => {
     const article = [{ created_at: 1542284514171 }];
     const expected = [{ created_at: new Date(article[0].created_at) }];
     expect(formatDates(article)).to.eql(expected);
   });
-  it("will take an array with all an article objects' details and return an array of the article object with all associated info.", () => {
+  it("will take an array with all an article objects' details and return an array of the article object with all associated info. WITHOUT MUTATING THE INPUT ARRAY", () => {
     const article = [
       {
         title: "Living in the shadow of a great man",
@@ -38,7 +38,7 @@ describe("formatDates", () => {
     expect(formatDates(article)).to.eql(expected);
     expect(article).to.not.equal(expected);
   });
-  it("will take an array with multiple article objects and return an NEW array of the article objects, without mutating the original array", () => {
+  it("will take an array of multiple article objects and return an NEW array of all article objects", () => {
     const article = [
       {
         title: "Living in the shadow of a great man",
@@ -83,27 +83,17 @@ describe("makeRefObj", () => {
   it("will take an empty array of comments and return an empty object", () => {
     expect(makeRefObj([])).to.eql({});
   });
-  it("will take a single article object in an array and return an object with the article's title as the key and the article's id as the value", () => {
+  it("will take a single article object with a title and article_id key in an array and return an object with the article's title as the key and the article's id as the value", () => {
     const article = [
       {
         article_id: 1,
-        title: "Running a Node App",
-        body:
-          "This is part two of a series on how to get up and " +
-          "running with Systemd and Node.js. This part dives " +
-          "deeper into how to successfully run your app with " +
-          "systemd long-term, and how to set it up in a production " +
-          "environment.",
-        votes: 0,
-        topic: "coding",
-        author: "jessjelly",
-        created_at: "2016-08-18T12:07:52.389Z"
+        title: "Running a Node App"
       }
     ];
     const expected = { "Running a Node App": 1 };
     expect(makeRefObj(article)).to.eql(expected);
   });
-  it("will take multiple article objects inside an array and return all article title and article ids as key-value pairs", () => {
+  it("will take multiple article objects inside an array and return all article title and article ids as key-value pairs, ignoring the rest of the article info. input", () => {
     const articles = [
       {
         article_id: 1,
@@ -152,9 +142,7 @@ describe("formatComments", () => {
     expect(formatComments({}, [])).to.eql([]);
   });
   it("will take a reference object with one key-value pair and a comments array with a single comments object and change the 'belongs_to' key value pair in the comments object to 'article_id' and it's relevant id number", () => {
-    const articleRefObj = {
-      "Running a Node App": 1
-    };
+    const articleRefObj = { "Running a Node App": 1 };
     const comment = [
       {
         belongs_to: "Running a Node App"
@@ -167,7 +155,7 @@ describe("formatComments", () => {
     ];
     expect(formatComments(articleRefObj, comment)).to.eql(expected);
   });
-  it("will take a reference object with multiple key value pairs and an array of multiple comments and return the comments with all article_ids replacing the belongs_to key", () => {
+  it("will take a reference object with multiple key value pairs and an array of multiple comments and return the comments with all article_ids replacing the belongs_to key WITHOUT MUTATING THE INPUT ARRAY", () => {
     const articleRefObj = {
       "Running a Node App": 1,
       "The Rise Of Thinking Machines: How IBM's Watson Takes On The World": 2
@@ -183,6 +171,7 @@ describe("formatComments", () => {
     ];
     const expected = [{ article_id: 1 }, { article_id: 2 }];
     expect(formatComments(articleRefObj, comment)).to.eql(expected);
+    expect(comment).to.not.equal(expected);
   });
   it("will reformat the timestamp value of 'created_at' to a legible js format", () => {
     const articleRefObj = {
