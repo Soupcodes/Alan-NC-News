@@ -1,6 +1,6 @@
 const connection = require("../db/connection");
 
-const selectArticle = article_id => {
+const selectArticleByArticleId = article_id => {
   return connection
     .select("articles.*")
     .count({ comment_count: "comment_id" })
@@ -35,4 +35,35 @@ const updateArticleVotes = (article_id, inc_votes) => {
     });
 };
 
-module.exports = { selectArticle, updateArticleVotes };
+const selectArticles = ({ sort_by = "created_at", order = "desc" }) => {
+  if (order !== "asc" && order !== "desc") {
+    order = "desc";
+  }
+  return connection
+    .select(
+      "articles.author",
+      "title",
+      "articles.article_id",
+      "topic",
+      "articles.created_at",
+      "articles.votes"
+    )
+    .count({ comment_count: "comment_id" })
+    .from("articles")
+    .leftJoin("comments", "articles.article_id", "comments.article_id")
+    .orderBy(sort_by, order)
+    .groupBy("articles.article_id")
+    .then(articles => {
+      if (!articles.length) {
+        return Promise.reject({ status: 404, msg: "Articles not found" });
+      } else {
+        return articles;
+      }
+    });
+};
+
+module.exports = {
+  selectArticleByArticleId,
+  updateArticleVotes,
+  selectArticles
+};

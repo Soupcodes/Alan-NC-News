@@ -17,7 +17,6 @@ exports.customErrors = (err, req, res, next) => {
 
 exports.sqlErrors = (err, req, res, next) => {
   if (err.code === "23502") {
-    console.log("23502");
     //Catches post requests where either the key-names are incorrect or are missing entirely
     res.status(400).send({ status: 400, msg: "Please check your input again" });
   }
