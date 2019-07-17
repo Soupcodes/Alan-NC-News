@@ -24,7 +24,10 @@ exports.sqlErrors = (err, req, res, next) => {
   if (err.code === "23503") {
     res.status(400).send({ status: 400, msg: "Invalid Input Detected" });
   } else if (err.code === "22P02") {
+    //Caught get comments by article_id where id wasn't a number
     res.status(400).send({ status: 400, msg: "Input Error Detected" });
+  } else if (err.code === "42703") {
+    res.status(400).send({ status: 400, msg: "Invalid Query Detected" });
   } else next(err);
 };
 

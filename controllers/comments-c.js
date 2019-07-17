@@ -5,7 +5,7 @@ const {
 
 const sendCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  console.log(req.query);
+  // console.log(req.query);
   selectCommentsByArticleId(article_id, req.query)
     .then(comments => {
       res.status(200).send({ status: 200, msg: comments });
