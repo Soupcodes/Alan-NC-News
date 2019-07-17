@@ -66,8 +66,18 @@ const updateComment = (comment_id, inc_votes) => {
     });
 };
 
+const delCommentFromDb = comment_id => {
+  return connection
+    .delete()
+    .from("comments")
+    .where({ comment_id })
+    .returning("*");
+  // .then(console.log);
+};
+
 module.exports = {
   selectCommentsByArticleId,
   insertCommentByArticleId,
-  updateComment
+  updateComment,
+  delCommentFromDb
 };

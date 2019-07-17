@@ -727,7 +727,7 @@ describe("/API", () => {
       });
     });
   });
-  describe.only("/COMMENTS", () => {
+  describe("/COMMENTS", () => {
     describe("/:COMMENT_ID", () => {
       describe("Patch requests", () => {
         it("PATCH accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the comment gets updated by and responds with a status 200 and the updated comment", () => {
@@ -843,6 +843,36 @@ describe("/API", () => {
             });
         });
       });
+
+      describe("Delete requests", () => {
+        it("DELETE of a valid comment id will return a status 204", () => {
+          return request(app)
+            .delete("/api/comments/1")
+            .expect(204);
+        });
+      });
+      describe("Delete errors", () => {
+        it("DELETE of an invalid comment id will return an error message as nothing will have been deleted", () => {
+          return request(app)
+            .delete("/api/comments/100")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal(
+                "Comment not found, nothing was deleted"
+              );
+              expect(body.status).to.equal(404);
+            });
+        });
+        it("DELETE of a comment id that is not in integer format will return a code 400 and bad request error message as nothing will have been accessed", () => {
+          return request(app)
+            .delete("/api/comments/not-an-id")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
+            });
+        });
+      });
     });
     it("UNSPECIFIED METHODS will return a status 405 error", () => {
       const invalidMethods = ["get", "post", "put"];
@@ -854,9 +884,4 @@ describe("/API", () => {
       return Promise.all(returnError);
     });
   });
-  // describe("INTERNAL SERVER ERROR", () => {
-  //   it("will return a server error status 500 and an internal server error message when the error has not been caught by any other error handler", () => {
-  //     //Unsure how or whether can test this - errors caught by 500 should be fixed and an error handler created to catch
-  //   });
-  // });
 });

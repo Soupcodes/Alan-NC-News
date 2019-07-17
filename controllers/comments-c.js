@@ -1,7 +1,8 @@
 const {
   selectCommentsByArticleId,
   insertCommentByArticleId,
-  updateComment
+  updateComment,
+  delCommentFromDb
 } = require("../models/comments-m");
 
 const sendCommentsByArticleId = (req, res, next) => {
@@ -32,8 +33,25 @@ const patchCommentByCommentId = (req, res, next) => {
     .catch(next);
 };
 
+const removeComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  delCommentFromDb(comment_id)
+    .then(deleted => {
+      if (deleted.length > 0) {
+        res.sendStatus(204);
+      } else {
+        return Promise.reject({
+          status: 404,
+          msg: "Comment not found, nothing was deleted"
+        });
+      }
+    })
+    .catch(next);
+};
+
 module.exports = {
   sendCommentsByArticleId,
   postCommentByArticleId,
-  patchCommentByCommentId
+  patchCommentByCommentId,
+  removeComment
 };
