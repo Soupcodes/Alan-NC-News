@@ -25,9 +25,11 @@ const postCommentByArticleId = (req, res, next) => {
 const patchCommentByCommentId = (req, res, next) => {
   const { comment_id } = req.params;
   const { inc_votes } = req.body;
-  updateComment(comment_id, inc_votes).then(newComment => {
-    res.status(200).send({ status: 200, msg: newComment });
-  });
+  updateComment(comment_id, inc_votes)
+    .then(newComment => {
+      res.status(200).send({ status: 200, msg: newComment });
+    })
+    .catch(next);
 };
 
 module.exports = {

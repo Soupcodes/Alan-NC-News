@@ -211,7 +211,7 @@ describe("/API", () => {
             });
         });
 
-        it("PATCH will return a status 400 and a bad request error if attempting the article_id isn't an integer", () => {
+        it("PATCH will return a status 400 and a bad request error if attempting to connect to the article_id that isn't an integer", () => {
           return request(app)
             .patch("/api/articles/not-an-id")
             .send({ inc_votes: 1 })
@@ -729,42 +729,119 @@ describe("/API", () => {
   });
   describe.only("/COMMENTS", () => {
     describe("/:COMMENT_ID", () => {
-      describe("Patch requests", () => {});
-      it("PATCH accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the comment gets updated by and responds with a status 200 and the updated comment", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({ inc_votes: 1 })
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.msg[0]).to.eql({
-              comment_id: 1,
-              author: "butter_bridge",
-              article_id: 9,
-              votes: 17,
-              created_at: "2017-11-22T12:36:03.389Z",
-              body:
-                "Oh, I've got compassion running out of my " +
-                "nose, pal! I'm the Sultan of Sentiment!"
+      describe("Patch requests", () => {
+        it("PATCH accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the comment gets updated by and responds with a status 200 and the updated comment", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: 1 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.msg[0]).to.eql({
+                comment_id: 1,
+                author: "butter_bridge",
+                article_id: 9,
+                votes: 17,
+                created_at: "2017-11-22T12:36:03.389Z",
+                body:
+                  "Oh, I've got compassion running out of my " +
+                  "nose, pal! I'm the Sultan of Sentiment!"
+              });
             });
-          });
+        });
+        it("PATCH accepts a negative 'newVote' value, updates the votes value by the relevant amount and responds with a status 200 and the updated comment", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: -16 })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.msg[0]).to.eql({
+                comment_id: 1,
+                author: "butter_bridge",
+                article_id: 9,
+                votes: 0,
+                created_at: "2017-11-22T12:36:03.389Z",
+                body:
+                  "Oh, I've got compassion running out of my " +
+                  "nose, pal! I'm the Sultan of Sentiment!"
+              });
+            });
+        });
+        it("PATCH will return a status 200 and the updated article, ignoring any additional properties have been included on the request body", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: -16, by: "mowgli" })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.msg[0]).to.eql({
+                comment_id: 1,
+                author: "butter_bridge",
+                article_id: 9,
+                votes: 0,
+                created_at: "2017-11-22T12:36:03.389Z",
+                body:
+                  "Oh, I've got compassion running out of my " +
+                  "nose, pal! I'm the Sultan of Sentiment!"
+              });
+            });
+        });
       });
-      it("PATCH accepts a negative 'newVote' value, updates the votes value by the relevant amount and responds with a status 200 and the updated comment", () => {
-        return request(app)
-          .patch("/api/comments/1")
-          .send({ inc_votes: -16 })
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.msg[0]).to.eql({
-              comment_id: 1,
-              author: "butter_bridge",
-              article_id: 9,
-              votes: 0,
-              created_at: "2017-11-22T12:36:03.389Z",
-              body:
-                "Oh, I've got compassion running out of my " +
-                "nose, pal! I'm the Sultan of Sentiment!"
+      describe("Patch errors", () => {
+        //SQL will detect that the inc_votes value is not an integer and throw an error
+        it("PATCH will return a status 400 and an bad request error message when the format of the value of inc_votes is not a number", () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ inc_votes: "hello" })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
             });
-          });
+        });
+
+        it("PATCH will return a status 400 and a bad request error if attempting to connect to the comment_id that isn't an integer", () => {
+          return request(app)
+            .patch("/api/comments/not-an-id")
+            .send({ inc_votes: 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
+            });
+        });
+
+        it('PATCH will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
+          return request(app)
+            .patch("/api/comments/1")
+            .send({ change_votes: 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Bad request");
+              expect(body.status).to.equal(400);
+            });
+        });
+
+        it("PATCH will return a status 400 and a bad request error when no value is included in the inc_votes body", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({ inc_votes: "" })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
+            });
+        });
+
+        it("PATCH will return a status 404 and a not found error message when the article_id being accessed doesn't exist", () => {
+          //article 100 could exist but has not been input yet so SQL will not throw an error, it will return an empty array
+          return request(app)
+            .patch("/api/articles/100")
+            .send({ inc_votes: 1 })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Article not found");
+              expect(body.status).to.equal(404);
+            });
+        });
       });
     });
     it("UNSPECIFIED METHODS will return a status 405 error", () => {
