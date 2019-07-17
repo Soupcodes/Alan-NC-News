@@ -1,8 +1,8 @@
 process.env.NODE_ENV = "test";
 const chai = require("chai");
 const { expect } = chai;
-const sort = require("chai-sorted");
-chai.use(sort);
+
+chai.use(require("chai-sorted"));
 const request = require("supertest");
 const app = require("../app");
 const connection = require("../db/connection");
@@ -459,13 +459,36 @@ describe("/API", () => {
                 expect(body.msg.length).to.equal(1);
               });
           });
-          it("GET will return a status 200 and sort the array by the date at which comments are created for an article_id", () => {
+          it("GET will return a status 200 and DEFAULT sort the array by the date at which comments are created for an article_id", () => {
             return request(app)
               .get("/api/articles/1/comments")
               .expect(200)
               .then(({ body }) => {
                 expect(body.status).to.equal(200);
-                expect(body.msg[0]).to.be.sortedBy("created_at");
+                expect(body.msg).to.be.sortedBy("created_at");
+                expect(body.msg[0].article_id).to.equal(1);
+                expect(body.msg.length).to.equal(13);
+              });
+          });
+          it("GET will return a status 200 and accepts a query to sort by any valid column the array, defaulted to ascending order, sorting by article_id will sort by created at only 1 article id will be pulled on any one request", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=article_id")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.status).to.equal(200);
+                expect(body.msg).to.be.sortedBy("article_id");
+                expect(body.msg).to.be.sortedBy("created_at");
+                expect(body.msg[0].article_id).to.equal(1);
+                expect(body.msg.length).to.equal(13);
+              });
+          });
+          it("GET will return a status 200 and accepts a query to sort by any valid column the array, defaulted to ascending order", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=comment_id")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.status).to.equal(200);
+                expect(body.msg).to.be.sortedBy("comment_id");
                 expect(body.msg[0].article_id).to.equal(1);
                 expect(body.msg.length).to.equal(13);
               });
