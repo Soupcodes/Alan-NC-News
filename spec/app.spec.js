@@ -1,5 +1,8 @@
 process.env.NODE_ENV = "test";
-const { expect } = require("chai");
+const chai = require("chai");
+const { expect } = chai;
+const sort = require("chai-sorted");
+chai.use(sort);
 const request = require("supertest");
 const app = require("../app");
 const connection = require("../db/connection");
@@ -92,7 +95,7 @@ describe("/API", () => {
   describe("/ARTICLES", () => {
     describe("/:ARTICLE_ID", () => {
       describe("Get requests", () => {
-        it("GET /:article_id will connect to the article_id endpoint and return the article corresponding with the id", () => {
+        it("GET will connect to the article_id endpoint and return the article corresponding with the id", () => {
           return request(app)
             .get("/api/articles/1")
             .expect(200)
@@ -109,7 +112,7 @@ describe("/API", () => {
               );
             });
         });
-        it("GET /:article_id will create a comment_count key and default to 0 if there are no comments yet associated with the article", () => {
+        it("GET will create a comment_count key and default to 0 if there are no comments yet associated with the article", () => {
           return request(app)
             .get("/api/articles/2")
             .expect(200)
@@ -119,7 +122,7 @@ describe("/API", () => {
         });
       });
       describe("Get errors", () => {
-        it("GET /:article_id will return a status 400 and bad request error message if incorrect id syntax is input", () => {
+        it("GET will return a status 400 and bad request error message if incorrect id syntax is input", () => {
           return request(app)
             .get("/api/articles/bad-id-req")
             .expect(400)
@@ -129,7 +132,7 @@ describe("/API", () => {
             });
         });
         //Not an SQL error as input is in correct format, so it will return an empty array
-        it("GET /:article_id will return a status 404 and error message if no article is found", () => {
+        it("GET will return a status 404 and error message if no article is found", () => {
           return request(app)
             .get("/api/articles/100")
             .expect(404)
@@ -140,7 +143,7 @@ describe("/API", () => {
         });
       });
       describe("Patch requests", () => {
-        it("PATCH /:article_id accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the article gets updated by and responds with a status 200 and the updated article", () => {
+        it("PATCH accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the article gets updated by and responds with a status 200 and the updated article", () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ inc_votes: 1 })
@@ -158,7 +161,7 @@ describe("/API", () => {
               expect(body.status).to.equal(200);
             });
         });
-        it("PATCH /:article_id will accept a negative newVote value and responds with a status 201 and the updated article", () => {
+        it("PATCH will accept a negative newVote value and responds with a status 201 and the updated article", () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ inc_votes: -100 })
@@ -176,54 +179,7 @@ describe("/API", () => {
               expect(body.status).to.equal(200);
             });
         });
-      });
-      describe("Patch errors", () => {
-        //SQL will detect that the inc_votes value is not an integer and throw an error
-        it("PATCH /:article_id will return a status 400 and an bad request error message when the format of the value of inc_votes is not a number", () => {
-          return request(app)
-            .patch("/api/articles/1")
-            .send({ inc_votes: "hello" })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Input Error Detected");
-              expect(body.status).to.equal(400);
-            });
-        });
-
-        it("PATCH /:article_id will return a status 400 and a bad request error if attempting the article_id isn't an integer", () => {
-          return request(app)
-            .patch("/api/articles/not-an-id")
-            .send({ inc_votes: 1 })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Input Error Detected");
-              expect(body.status).to.equal(400);
-            });
-        });
-
-        it('PATCH /:article_id will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
-          return request(app)
-            .patch("/api/articles/1")
-            .send({ change_votes: 1 })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Bad request");
-              expect(body.status).to.equal(400);
-            });
-        });
-
-        it("PATCH /:article_id will return a status 400 and a bad request error when no value is included in the inc_votes body", () => {
-          return request(app)
-            .patch("/api/articles/1")
-            .send({ inc_votes: "" })
-            .expect(400)
-            .then(({ body }) => {
-              expect(body.msg).to.equal("Input Error Detected");
-              expect(body.status).to.equal(400);
-            });
-        });
-
-        it("PATCH /:article_id will return a status 200 and the updated article, ignoring any additional properties have been included on the request body", () => {
+        it("PATCH will return a status 200 and the updated article, ignoring any additional properties have been included on the request body", () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ inc_votes: 1, by: "Aladdin" })
@@ -241,8 +197,54 @@ describe("/API", () => {
               expect(body.status).to.equal(200);
             });
         });
+      });
+      describe("Patch errors", () => {
+        //SQL will detect that the inc_votes value is not an integer and throw an error
+        it("PATCH will return a status 400 and an bad request error message when the format of the value of inc_votes is not a number", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({ inc_votes: "hello" })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
+            });
+        });
 
-        it("PATCH /:article_id will return a status 404 and a not found error message when the article_id being accessed doesn't exist", () => {
+        it("PATCH will return a status 400 and a bad request error if attempting the article_id isn't an integer", () => {
+          return request(app)
+            .patch("/api/articles/not-an-id")
+            .send({ inc_votes: 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
+            });
+        });
+
+        it('PATCH will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({ change_votes: 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Bad request");
+              expect(body.status).to.equal(400);
+            });
+        });
+
+        it("PATCH will return a status 400 and a bad request error when no value is included in the inc_votes body", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({ inc_votes: "" })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Input Error Detected");
+              expect(body.status).to.equal(400);
+            });
+        });
+
+        it("PATCH will return a status 404 and a not found error message when the article_id being accessed doesn't exist", () => {
           //article 100 could exist but has not been input yet so SQL will not throw an error, it will return an empty array
           return request(app)
             .patch("/api/articles/100")
@@ -267,7 +269,7 @@ describe("/API", () => {
         });
       });
 
-      describe("/COMMENTS", () => {
+      describe.only("/COMMENTS", () => {
         describe("Post requests", () => {
           it("POST will return a status 201 and respond with the body of the posted comment", () => {
             return request(app)
@@ -275,6 +277,21 @@ describe("/API", () => {
               .send({
                 username: "butter_bridge",
                 body: "I can't see the light behind the shadow!"
+              })
+              .expect(201)
+              .then(({ body }) => {
+                expect(body.msg).to.equal(
+                  "I can't see the light behind the shadow!"
+                );
+              });
+          });
+          it("POST will return a status 201 and respond with the body of the posted comment, ignoring any additional key-value pairs that are included", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "butter_bridge",
+                body: "I can't see the light behind the shadow!",
+                random: "This will be ignored"
               })
               .expect(201)
               .then(({ body }) => {
@@ -295,12 +312,119 @@ describe("/API", () => {
               .expect(400)
               .then(({ body }) => {
                 expect(body.status).to.equal(400);
-                expect(body.msg).to.equal("Invalid username input");
+                expect(body.msg).to.equal("Invalid Input Detected");
+              });
+          });
+          it("POST will return a status 400 and a bad request error message when posting a comment where the body is not in string format", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "soup",
+                body: 1234567890
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.status).to.equal(400);
+                expect(body.msg).to.equal("Invalid Input Detected");
+              });
+          });
+          it("POST will return a status 400 and a bad request error message when posting a comment to an article_id that isn't an id ", () => {
+            return request(app)
+              .post("/api/articles/thou-shalt-not-pass/comments")
+              .send({
+                username: "soup",
+                body: "I can't see the light behind the shadow!"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.status).to.equal(400);
+                expect(body.msg).to.equal("Invalid Input Detected");
+              });
+          });
+
+          it('POST will return a status 400 and a bad request error when "username" isn\'t used as the key of the post', () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                user: "soup",
+                body: "I can't see the light behind the shadow!"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Please check your input again");
+                expect(body.status).to.equal(400);
+              });
+          });
+
+          it('POST will return a status 400 and a bad request error when "body" isn\'t used as the key of the post', () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "soup",
+                comment: "I can't see the light behind the shadow!"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Please check your input again");
+                expect(body.status).to.equal(400);
+              });
+          });
+
+          it("POST will return a status 400 and a bad request error when the body key of the post is missing", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({ username: "soup" })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Please check your input again");
+                expect(body.status).to.equal(400);
+              });
+          });
+
+          it("POST will return a status 400 and a bad request error when the username key of the post is missing", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                body: "I can't see the light behind the shadow!"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Please check your input again");
+                expect(body.status).to.equal(400);
+              });
+          });
+
+          it("POST will return a status 400 and a bad request error when no value is included on the username key", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "",
+                body: "I can't see the light behind the shadow!"
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.status).to.equal(400);
+              });
+          });
+
+          it("POST will return a status 400 and a bad request error when no value is included on the body key", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "soup",
+                body: ""
+              })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.status).to.equal(400);
               });
           });
         });
-        describe("Get requests", () => {
-          it("GET /:article_id/comments will return a status 200 and an array of comments for the specified article_id", () => {
+
+        describe.only("Get requests", () => {
+          it("GET will return a status 200 and an array of comments for the specified article_id", () => {
             return request(app)
               .get("/api/articles/1/comments")
               .expect(200)
@@ -317,7 +441,7 @@ describe("/API", () => {
                 expect(body.msg[0].article_id).to.equal(1);
               });
           });
-          it("GET /:article_id/comments will return a status 200 and an array of empty comment details for an article_id that exists but has no comments", () => {
+          it("GET will return a status 200 and an array of empty comment details for an article_id that exists but has no comments", () => {
             return request(app)
               .get("/api/articles/2/comments")
               .expect(200)
@@ -335,9 +459,20 @@ describe("/API", () => {
                 expect(body.msg.length).to.equal(1);
               });
           });
+          it("GET will return a status 200 and sort the array by the date at which comments are created for an article_id", () => {
+            return request(app)
+              .get("/api/articles/1/comments")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.status).to.equal(200);
+                expect(body.msg[0]).to.be.sortedBy("created_at");
+                expect(body.msg[0].article_id).to.equal(1);
+                expect(body.msg.length).to.equal(13);
+              });
+          });
         });
         describe("Get errors", () => {
-          it("GET /:article_id/comments will return a status 400 and an error message if attempting to get comments to an article_id isn't a number", () => {
+          it("GET will return a status 400 and an error message if attempting to get comments to an article_id isn't a number", () => {
             return request(app)
               .get("/api/articles/not-an-id/comments")
               .expect(400)
@@ -346,7 +481,7 @@ describe("/API", () => {
                 expect(body.msg).to.equal("Input Error Detected");
               });
           });
-          it("GET /:article_id/comments will return a status 404 and an error message if attempting to get comments for an article_id that doesn't exist", () => {
+          it("GET will return a status 404 and an error message if attempting to get comments for an article_id that doesn't exist", () => {
             return request(app)
               .get("/api/articles/100/comments")
               .expect(404)
@@ -356,13 +491,24 @@ describe("/API", () => {
               });
           });
         });
+        describe("Method errors", () => {
+          it("UNSPECIFIED METHODS will return a status 405 error", () => {
+            const invalidMethods = ["patch", "put", "delete"];
+            const returnError = invalidMethods.map(method => {
+              return request(app)
+                [method]("/api/articles/1/comments")
+                .expect(405);
+            });
+            return Promise.all(returnError);
+          });
+        });
       });
     });
   });
 
-  describe("INTERNAL SERVER ERROR", () => {
-    it("will return a server error status 500 and an internal server error message when the error has not been caught by any other error handler", () => {
-      //Unsure how or whether can test this - errors caught by 500 should be fixed and an error handler created to catch
-    });
-  });
+  // describe("INTERNAL SERVER ERROR", () => {
+  //   it("will return a server error status 500 and an internal server error message when the error has not been caught by any other error handler", () => {
+  //     //Unsure how or whether can test this - errors caught by 500 should be fixed and an error handler created to catch
+  //   });
+  // });
 });

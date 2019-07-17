@@ -17,7 +17,12 @@ const postCommentByArticleId = (req, res, next) => {
     .then(comment => {
       res.status(201).send({ msg: comment[0] });
     })
-    .catch(next);
+    .catch(
+      next
+      // err => {
+      //   console.log(err);
+      // }
+    );
 };
 
 module.exports = { sendCommentsByArticleId, postCommentByArticleId };

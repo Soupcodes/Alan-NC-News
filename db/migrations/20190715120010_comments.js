@@ -7,7 +7,8 @@ exports.up = function(connectToDB) {
     commentsTable
       .string("author")
       .references("username")
-      .inTable("users");
+      .inTable("users")
+      .notNullable();
     commentsTable
       .integer("article_id")
       .references("article_id")
@@ -15,7 +16,7 @@ exports.up = function(connectToDB) {
       .unsigned();
     commentsTable.integer("votes").defaultTo(0);
     commentsTable.timestamp("created_at").defaultTo(connectToDB.fn.now());
-    commentsTable.string("body", 750);
+    commentsTable.string("body", 750).notNullable();
   });
 };
 
