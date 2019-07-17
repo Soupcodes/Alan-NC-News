@@ -21,21 +21,16 @@ const updateArticleVotes = (article_id, inc_votes) => {
   return connection
     .select("*")
     .from("articles")
+    .increment("votes", inc_votes)
     .where({ article_id })
+    .returning("*")
     .then(article => {
-      if (!article.length) {
+      if (inc_votes === undefined) {
+        return Promise.reject({ status: 400, msg: "Bad request" });
+      } else if (!article.length) {
         return Promise.reject({ status: 404, msg: "Article not found" });
       } else {
-        if (typeof inc_votes !== "number") {
-          return Promise.reject({
-            status: 400,
-            msg: "Type error, please check your input"
-          });
-        } else {
-          const newArticle = { ...article[0] };
-          newArticle.votes += inc_votes;
-          return newArticle;
-        }
+        return article;
       }
     });
 };

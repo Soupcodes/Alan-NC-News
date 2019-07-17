@@ -16,8 +16,10 @@ exports.customErrors = (err, req, res, next) => {
 
 exports.sqlErrors = (err, req, res, next) => {
   if (err.code === "23503") {
-    res.status(400).send({ status: 400, msg: "Invalid username input" });
-  }
+    res.status(400).send({ status: 400, msg: err.message.split(" - ")[1] });
+  } else if (err.code === "22P02") {
+    res.status(400).send({ status: 400, msg: "Input Error Detected" });
+  } else next(err);
 };
 
 // exports.internalServerError = (err, req, res, next) => {

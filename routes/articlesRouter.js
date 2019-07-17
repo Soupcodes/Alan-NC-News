@@ -4,11 +4,13 @@ const {
   sendCommentsByArticleId,
   postCommentByArticleId
 } = require("../controllers/comments-c");
+const { methodNotAllowed } = require("../errors/errors");
 
 articlesRouter
   .route("/:article_id")
   .get(sendArticle)
-  .patch(patchArticleVotes);
+  .patch(patchArticleVotes)
+  .all(methodNotAllowed);
 
 articlesRouter
   .route("/:article_id/comments")
