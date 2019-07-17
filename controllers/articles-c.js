@@ -10,8 +10,8 @@ const sendArticle = (req, res, next) => {
 };
 
 const patchArticleVotes = (req, res, next) => {
-  const { inc_votes } = req.body;
   const { article_id } = req.params;
+  const { inc_votes } = req.body;
   updateArticleVotes(article_id, inc_votes)
     .then(newArticle => {
       res.status(200).send({ status: 200, msg: newArticle });

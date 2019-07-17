@@ -1,6 +1,7 @@
 const {
   selectCommentsByArticleId,
-  insertCommentByArticleId
+  insertCommentByArticleId,
+  updateComment
 } = require("../models/comments-m");
 
 const sendCommentsByArticleId = (req, res, next) => {
@@ -18,12 +19,19 @@ const postCommentByArticleId = (req, res, next) => {
     .then(comment => {
       res.status(201).send({ msg: comment[0] });
     })
-    .catch(
-      next
-      // err => {
-      //   console.log(err);
-      // }
-    );
+    .catch(next);
 };
 
-module.exports = { sendCommentsByArticleId, postCommentByArticleId };
+const patchCommentByCommentId = (req, res, next) => {
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+  updateComment(comment_id, inc_votes).then(newComment => {
+    res.status(200).send({ status: 200, msg: newComment });
+  });
+};
+
+module.exports = {
+  sendCommentsByArticleId,
+  postCommentByArticleId,
+  patchCommentByCommentId
+};

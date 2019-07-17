@@ -46,4 +46,28 @@ const insertCommentByArticleId = ({ username, body }) => {
     .returning("body");
 };
 
-module.exports = { selectCommentsByArticleId, insertCommentByArticleId };
+const updateComment = (comment_id, inc_votes) => {
+  // console.log(comment_id, inc_votes);
+  return connection
+    .select("*")
+    .from("comments")
+    .increment("votes", inc_votes)
+    .where({ comment_id })
+    .returning("*")
+    .then(comment => {
+      // console.log(comment);
+      if (inc_votes === undefined) {
+        return Promise.reject({ status: 400, msg: "Bad request" });
+      } else if (!comment.length) {
+        return Promise.reject({ status: 404, msg: "Comment not found" });
+      } else {
+        return comment;
+      }
+    });
+};
+
+module.exports = {
+  selectCommentsByArticleId,
+  insertCommentByArticleId,
+  updateComment
+};

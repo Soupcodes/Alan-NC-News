@@ -516,17 +516,32 @@ describe("/API", () => {
                 expect(body.msg.length).to.equal(13);
               });
           });
-          // it("GET will return a status 200 and accepts a query to sort the body column of the array", () => {
-          //   return request(app)
-          //     .get("/api/articles/1/comments?sort_by=body")
-          //     .expect(200)
-          //     .then(({ body }) => {
-          //       expect(body.status).to.equal(200);
-          //       expect(body.msg).to.be.descendingBy("body");
-          //       expect(body.msg[0].article_id).to.equal(1);
-          //       expect(body.msg.length).to.equal(13);
-          //     });
-          // });
+          it("GET will return a status 200 and accepts a query to sort the body column of the array", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=body")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.status).to.equal(200);
+                expect(body.msg[0]).to.eql({
+                  article_id: 1,
+                  comment_id: 18,
+                  votes: 16,
+                  created_at: "2000-11-26T12:36:03.389Z",
+                  body: "This morning, I showered for nine minutes.",
+                  author: "butter_bridge"
+                });
+                expect(body.msg[12]).to.eql({
+                  article_id: 1,
+                  comment_id: 11,
+                  votes: 0,
+                  created_at: "2007-11-25T12:36:03.389Z",
+                  body: "Ambidextrous marsupial",
+                  author: "butter_bridge"
+                });
+                expect(body.msg[0].article_id).to.equal(1);
+                expect(body.msg.length).to.equal(13);
+              });
+          });
           it("GET will return a status 200 and accepts a query to order the article_id column in ascending order, sort_by author will sort_by created at", () => {
             return request(app)
               .get("/api/articles/1/comments?sort_by=article_id&order=asc")
@@ -573,17 +588,33 @@ describe("/API", () => {
                 expect(body.msg.length).to.equal(13);
               });
           });
-          // it("GET will return a status 200 and accepts a query to sort the body column of the array", () => {
-          //   return request(app)
-          //     .get("/api/articles/1/comments?sort_by=body")
-          //     .expect(200)
-          //     .then(({ body }) => {
-          //       expect(body.status).to.equal(200);
-          //       expect(body.msg).to.be.ascendingBy("body");
-          //       expect(body.msg[0].article_id).to.equal(1);
-          //       expect(body.msg.length).to.equal(13);
-          //     });
-          // });
+          it("GET will return a status 200 and accepts a query to sort the body column of the array", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=body&order=asc")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.status).to.equal(200);
+                expect(body.msg[0]).to.eql({
+                  article_id: 1,
+                  comment_id: 11,
+                  votes: 0,
+                  created_at: "2007-11-25T12:36:03.389Z",
+                  body: "Ambidextrous marsupial",
+                  author: "butter_bridge"
+                });
+                expect(body.msg[12]).to.eql({
+                  article_id: 1,
+                  comment_id: 18,
+                  votes: 16,
+                  created_at: "2000-11-26T12:36:03.389Z",
+                  body: "This morning, I showered for nine minutes.",
+                  author: "butter_bridge"
+                });
+                expect(body.msg[0].article_id).to.equal(1);
+                expect(body.msg.length).to.equal(13);
+              });
+          });
+
           it("GET will return a status 200 and return the default array with the relevant sort and order defaults when attempting to query a sort key does not equal sort_by", () => {
             return request(app)
               .get("/api/articles/1/comments?sort=category")
@@ -696,7 +727,56 @@ describe("/API", () => {
       });
     });
   });
-
+  describe.only("/COMMENTS", () => {
+    describe("/:COMMENT_ID", () => {
+      describe("Patch requests", () => {});
+      it("PATCH accepts an object input { inc_votes: newVote } where 'newVote' indicates how many votes the comment gets updated by and responds with a status 200 and the updated comment", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 1 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.msg[0]).to.eql({
+              comment_id: 1,
+              author: "butter_bridge",
+              article_id: 9,
+              votes: 17,
+              created_at: "2017-11-22T12:36:03.389Z",
+              body:
+                "Oh, I've got compassion running out of my " +
+                "nose, pal! I'm the Sultan of Sentiment!"
+            });
+          });
+      });
+      it("PATCH accepts a negative 'newVote' value, updates the votes value by the relevant amount and responds with a status 200 and the updated comment", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: -16 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.msg[0]).to.eql({
+              comment_id: 1,
+              author: "butter_bridge",
+              article_id: 9,
+              votes: 0,
+              created_at: "2017-11-22T12:36:03.389Z",
+              body:
+                "Oh, I've got compassion running out of my " +
+                "nose, pal! I'm the Sultan of Sentiment!"
+            });
+          });
+      });
+    });
+    it("UNSPECIFIED METHODS will return a status 405 error", () => {
+      const invalidMethods = ["get", "post", "put"];
+      const returnError = invalidMethods.map(method => {
+        return request(app)
+          [method]("/api/comments/1")
+          .expect(405);
+      });
+      return Promise.all(returnError);
+    });
+  });
   // describe("INTERNAL SERVER ERROR", () => {
   //   it("will return a server error status 500 and an internal server error message when the error has not been caught by any other error handler", () => {
   //     //Unsure how or whether can test this - errors caught by 500 should be fixed and an error handler created to catch
