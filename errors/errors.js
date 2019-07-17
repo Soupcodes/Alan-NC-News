@@ -2,6 +2,10 @@ exports.routeNotFound = (req, res, next) => {
   res.status(404).send({ status: 404, msg: "Route not found" });
 };
 
+exports.methodNotAllowed = (req, res, next) => {
+  res.sendStatus(405);
+};
+
 exports.customErrors = (err, req, res, next) => {
   if (err.status === 404) {
     res.status(404).send({ status: 404, msg: err.msg });

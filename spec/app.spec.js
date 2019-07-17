@@ -29,6 +29,15 @@ describe("/API", () => {
           expect(body.topics[0]).to.have.keys("slug", "description");
         });
     });
+    it("UNSPECIFIED METHODS will return a status 405 error", () => {
+      const invalidMethods = ["patch", "put", "delete"];
+      const returnError = invalidMethods.map(method => {
+        return request(app)
+          [method]("/api/topics")
+          .expect(405);
+      });
+      return Promise.all(returnError);
+    });
   });
 
   describe("/USERS", () => {
@@ -60,7 +69,7 @@ describe("/API", () => {
           .get("/api/articles/1")
           .expect(200)
           .then(({ body }) => {
-            expect(body.article).to.have.keys(
+            expect(body.article[0]).to.have.keys(
               "author",
               "title",
               "article_id",
@@ -77,7 +86,7 @@ describe("/API", () => {
           .get("/api/articles/2")
           .expect(200)
           .then(({ body }) => {
-            expect(body.article.comment_count).to.equal(0);
+            expect(+body.article[0].comment_count).to.equal(0);
           });
       });
       it("GET /:article_id will return a status 404 and error message if no article is found", () => {
