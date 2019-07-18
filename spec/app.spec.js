@@ -12,7 +12,7 @@ describe("/API", () => {
   after(() => connection.destroy());
 
   describe("/", () => {
-    it("will return a JSON file describing all the available endpoints on this API", () => {
+    it.only("will return a JSON file describing all the available endpoints on this API", () => {
       return request(app)
         .get("/api")
         .expect(200)
