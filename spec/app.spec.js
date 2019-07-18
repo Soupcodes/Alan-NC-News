@@ -12,7 +12,7 @@ describe("/API", () => {
   after(() => connection.destroy());
 
   describe("/", () => {
-    it.only("will return a JSON file describing all the available endpoints on this API", () => {
+    it("will return a JSON file describing all the available endpoints on this API", () => {
       return request(app)
         .get("/api")
         .expect(200)
@@ -69,7 +69,6 @@ describe("/API", () => {
             .get("/api/users/lurker")
             .expect(200)
             .then(({ body }) => {
-              console.log(body);
               expect(body.user).to.have.keys("username", "avatar_url", "name");
             });
         });
@@ -521,6 +520,18 @@ describe("/API", () => {
         });
 
         describe("Post errors", () => {
+          it("POST will return a status 404 and respond with a user not found message when trying to post a comment with a username that doesn't exist", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({
+                username: "soup",
+                body: "You need to exist first"
+              })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.status).to.equal(404);
+              });
+          });
           it("POST will return a status 400 and a bad request error message when posting a comment to an article_id that isn't an id ", () => {
             return request(app)
               .post("/api/articles/thou-shalt-not-pass/comments")
@@ -929,7 +940,6 @@ describe("/API", () => {
             .send({ inc_votes: 1 })
             .expect(200)
             .then(({ body }) => {
-              console.log(body);
               expect(body.comment).to.eql({
                 comment_id: 1,
                 author: "butter_bridge",
