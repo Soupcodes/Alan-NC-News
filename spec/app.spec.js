@@ -57,11 +57,12 @@ describe("/API", () => {
   describe("/USERS", () => {
     describe("/:USERNAME", () => {
       describe("Get requests", () => {
-        it("GET /:username will connect to the username endpoint and return a user object with all their properties", () => {
+        it.only("GET /:username will connect to the username endpoint and return a user object with all their properties", () => {
           return request(app)
             .get("/api/users/lurker")
             .expect(200)
             .then(({ body }) => {
+              console.log(body)
               expect(body.user).to.have.keys("username", "avatar_url", "name");
             });
         });
@@ -921,6 +922,7 @@ describe("/API", () => {
             .send({ inc_votes: 1 })
             .expect(200)
             .then(({ body }) => {
+              console.log(body);
               expect(body.comment).to.eql({
                 comment_id: 1,
                 author: "butter_bridge",
