@@ -4,6 +4,12 @@ const usersRouter = require("./usersRouter");
 const articlesRouter = require("./articlesRouter");
 const commentsRouter = require("./commentsRouter");
 const { methodNotAllowed } = require("../errors/errors");
+const { sendJsonEndpoints } = require("../controllers/jsonEndpoints-c");
+
+apiRouter
+  .route("/")
+  .get(sendJsonEndpoints)
+  .all(methodNotAllowed);
 
 apiRouter
   .route("/topics")

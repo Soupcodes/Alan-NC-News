@@ -15,9 +15,10 @@ const sendCommentsByArticleId = (req, res, next) => {
 };
 
 const postCommentByArticleId = (req, res, next) => {
-  insertCommentByArticleId(req.body)
+  const { article_id } = req.params;
+  insertCommentByArticleId(article_id, req.body)
     .then(comment => {
-      res.status(201).send({ msg: comment[0] });
+      res.status(201).send({ comment });
     })
     .catch(next);
 };
@@ -26,8 +27,8 @@ const patchCommentByCommentId = (req, res, next) => {
   const { comment_id } = req.params;
   const { inc_votes } = req.body;
   updateComment(comment_id, inc_votes)
-    .then(newComment => {
-      res.status(200).send({ status: 200, msg: newComment });
+    .then(comment => {
+      res.status(200).send({ comment });
     })
     .catch(next);
 };

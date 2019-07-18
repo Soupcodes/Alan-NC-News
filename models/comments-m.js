@@ -5,7 +5,7 @@ const selectCommentsByArticleId = (
   { sort_by = "created_at", order = "desc" }
 ) => {
   if (order === "asc" || order === "desc") {
-    if (sort_by === "article_id" || sort_by === "author") {
+    if (sort_by === "article_id") {
       sort_by = "created_at";
     }
     return connection
@@ -15,7 +15,7 @@ const selectCommentsByArticleId = (
         "comments.votes",
         "comments.created_at",
         "comments.body",
-        "articles.author"
+        "comments.author"
       )
       .from("articles")
       .leftJoin("comments", "articles.article_id", "comments.article_id")
@@ -26,13 +26,6 @@ const selectCommentsByArticleId = (
         if (!comments.length) {
           return Promise.reject({ status: 404, msg: "Article not found" });
         }
-        // else if (!sort_by || order) {
-        //   console.log(sort_by, order, "WAT");
-        //   // return Promise.reject({
-        //   //   status: 400,
-        //   //   msg: "Invalid Query Detected"
-        //   // });
-        // }
         return comments;
       });
   } else {
@@ -40,16 +33,33 @@ const selectCommentsByArticleId = (
   }
 };
 
-const insertCommentByArticleId = ({ username, body }) => {
-  const author = username;
-  const formattedComment = { author, body };
-  return connection
-    .insert(formattedComment)
-    .into("comments")
-    .returning("body");
+const insertCommentByArticleId = (article_id, req) => {
+  if (Object.keys(req).length > 2) {
+    return Promise.reject({
+      status: 400,
+      msg: "Post error, please try again"
+    });
+  } else {
+    const { username, body } = req;
+    const author = username;
+    const formattedComment = { article_id, author, body };
+    return connection
+      .insert(formattedComment)
+      .into("comments")
+      .where({ "comments.article_id": article_id })
+      .returning("*")
+      .then(comment => {
+        return comment[0];
+      });
+  }
 };
 
 const updateComment = (comment_id, inc_votes) => {
+  if (inc_votes === undefined) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {
+    inc_votes = 0;
+  }
   return connection
     .select("*")
     .from("comments")
@@ -57,12 +67,10 @@ const updateComment = (comment_id, inc_votes) => {
     .where({ comment_id })
     .returning("*")
     .then(comment => {
-      if (inc_votes === undefined) {
-        return Promise.reject({ status: 400, msg: "Bad request" });
-      } else if (!comment.length) {
+      if (!comment.length) {
         return Promise.reject({ status: 404, msg: "Comment not found" });
       } else {
-        return comment;
+        return comment[0];
       }
     });
 };

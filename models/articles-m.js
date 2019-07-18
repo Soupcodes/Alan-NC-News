@@ -12,12 +12,17 @@ const selectArticleByArticleId = article_id => {
       if (!article.length) {
         return Promise.reject({ status: 404, msg: "Article not found" });
       } else {
-        return article;
+        return article[0];
       }
     });
 };
 
 const updateArticleVotes = (article_id, inc_votes) => {
+  if (inc_votes === undefined) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {
+    inc_votes = 0;
+  }
   return connection
     .select("*")
     .from("articles")
@@ -25,12 +30,10 @@ const updateArticleVotes = (article_id, inc_votes) => {
     .where({ article_id })
     .returning("*")
     .then(article => {
-      if (inc_votes === undefined) {
-        return Promise.reject({ status: 400, msg: "Bad request" });
-      } else if (!article.length) {
+      if (!article.length) {
         return Promise.reject({ status: 404, msg: "Article not found" });
       } else {
-        return article;
+        return article[0];
       }
     });
 };

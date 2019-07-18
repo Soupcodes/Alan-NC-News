@@ -13,6 +13,7 @@ exports.up = function(connectToDB) {
       .integer("article_id")
       .references("article_id")
       .inTable("articles")
+      .onDelete("CASCADE")
       .unsigned();
     commentsTable.integer("votes").defaultTo(0);
     commentsTable.timestamp("created_at").defaultTo(connectToDB.fn.now());
