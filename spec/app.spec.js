@@ -62,11 +62,7 @@ describe("/API", () => {
             .get("/api/users/lurker")
             .expect(200)
             .then(({ body }) => {
-              expect(body.user).to.have.keys(
-                "username",
-                "avatar_url",
-                "name"
-              );
+              expect(body.user).to.have.keys("username", "avatar_url", "name");
             });
         });
       });
@@ -456,7 +452,7 @@ describe("/API", () => {
               expect(body.status).to.equal(400);
             });
         });
-        it.only('PATCH will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
+        it('PATCH will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ change_votes: 1 })

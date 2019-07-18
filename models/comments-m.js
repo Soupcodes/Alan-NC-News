@@ -70,7 +70,7 @@ const insertCommentByArticleId = (article_id, req) => {
   }
 };
 
-const updateComment = (comment_id, inc_votes = 0) => {
+const updateComment = (comment_id, inc_votes) => {
   if (inc_votes === undefined) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {

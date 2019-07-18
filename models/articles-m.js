@@ -17,9 +17,9 @@ const selectArticleByArticleId = article_id => {
     });
 };
 
-const updateArticleVotes = (article_id, inc_votes = 0) => {
+const updateArticleVotes = (article_id, inc_votes) => {
   if (inc_votes === undefined) {
-    return Promise.reject({ status: 400, msg: "Bad request" });
+    return Promise.reject({ status: 400, msg: "Invalid Input Detected" });
   } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {
     inc_votes = 0;
   }
@@ -70,7 +70,7 @@ const selectArticles = ({
           return articles;
         }
       });
-    } else {
+  } else {
     return Promise.reject({ status: 400, msg: "Invalid order Input" });
   }
 };
