@@ -35,31 +35,41 @@ const updateArticleVotes = (article_id, inc_votes) => {
     });
 };
 
-const selectArticles = ({ sort_by = "created_at", order = "desc" }) => {
-  if (order !== "asc" && order !== "desc") {
-    order = "desc";
+const selectArticles = ({
+  sort_by = "created_at",
+  order = "desc",
+  author,
+  topic
+}) => {
+  if (order === "asc" || order === "desc") {
+    return connection
+      .select(
+        "articles.author",
+        "title",
+        "articles.article_id",
+        "topic",
+        "articles.created_at",
+        "articles.votes"
+      )
+      .count({ comment_count: "comment_id" })
+      .from("articles")
+      .leftJoin("comments", "articles.article_id", "comments.article_id")
+      .orderBy(sort_by, order)
+      .groupBy("articles.article_id")
+      .modify(query => {
+        if (author) query.where({ "articles.author": author });
+        if (topic) query.where({ "articles.topic": topic });
+      })
+      .then(articles => {
+        if (!articles.length) {
+          return Promise.reject({ status: 404, msg: "Articles not found" });
+        } else {
+          return articles;
+        }
+      });
+  } else {
+    return Promise.reject({ status: 400, msg: "Invalid order Input" });
   }
-  return connection
-    .select(
-      "articles.author",
-      "title",
-      "articles.article_id",
-      "topic",
-      "articles.created_at",
-      "articles.votes"
-    )
-    .count({ comment_count: "comment_id" })
-    .from("articles")
-    .leftJoin("comments", "articles.article_id", "comments.article_id")
-    .orderBy(sort_by, order)
-    .groupBy("articles.article_id")
-    .then(articles => {
-      if (!articles.length) {
-        return Promise.reject({ status: 404, msg: "Articles not found" });
-      } else {
-        return articles;
-      }
-    });
 };
 
 module.exports = {

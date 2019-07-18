@@ -34,6 +34,7 @@ const patchCommentByCommentId = (req, res, next) => {
 };
 
 const removeComment = (req, res, next) => {
+  console.log(req.query);
   const { comment_id } = req.params;
   delCommentFromDb(comment_id)
     .then(deleted => {

@@ -28,10 +28,7 @@ const sendArticles = (req, res, next) => {
     .then(articles => {
       res.status(200).send({ articles });
     })
-    .catch(
-      next
-      // err => console.log(err)
-    );
+    .catch(next);
 };
 
 module.exports = { sendArticleByArticleId, patchArticleVotes, sendArticles };

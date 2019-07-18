@@ -238,6 +238,26 @@ describe("/API", () => {
               expect(+body.articles[11].comment_count).to.equal(13);
             });
         });
+        it("GET will return the articles array, filtered by the username (articles.author) provided in the query", () => {
+          return request(app)
+            .get("/api/articles?author=butter_bridge")
+            .expect(200)
+            .then(({ body }) => {
+              body.articles.map(article => {
+                expect(article.author).to.equal("butter_bridge");
+              });
+            });
+        });
+        it("GET will return the articles array, filtered by the topic provided in the query", () => {
+          return request(app)
+            .get("/api/articles?topic=mitch")
+            .expect(200)
+            .then(({ body }) => {
+              body.articles.map(article => {
+                expect(article.topic).to.equal("mitch");
+              });
+            });
+        });
       });
       describe("Get errors", () => {
         it("GET will return a status 400 when attempting to query sort the array by a column that does not exist", () => {
@@ -249,20 +269,28 @@ describe("/API", () => {
               expect(body.msg).to.equal("Invalid Query Detected");
             });
         });
-        it("GET will return a status 200 and return the sort_by column defaulted in descending order when querying order with a value that isn't 'asc' or 'desc'", () => {
+        it("GET will return an error if provided an author that doesn't exist in the query", () => {
+          return request(app)
+            .get("/api/articles?author=soup")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Articles not found");
+            });
+        });
+        it("GET will return an error if provided a topic that doesn't exist in the query", () => {
+          return request(app)
+            .get("/api/articles?topic=errorBambiNotFound")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).to.equal("Articles not found");
+            });
+        });
+        it("GET will return a status 400 and return the sort_by column defaulted in descending order when querying order with a value that isn't 'asc' or 'desc'", () => {
           return request(app)
             .get("/api/articles?order=chaos")
-            .expect(200)
+            .expect(400)
             .then(({ body }) => {
-              expect(body.articles[0]).to.eql({
-                author: "butter_bridge",
-                title: "Living in the shadow of a great man",
-                article_id: 1,
-                topic: "mitch",
-                created_at: "2018-11-15T12:21:54.171Z",
-                votes: 100,
-                comment_count: "13"
-              });
+              expect(body.msg).to.equal("Invalid order Input");
             });
         });
       });
@@ -870,12 +898,12 @@ describe("/API", () => {
                 expect(body.msg).to.equal("Invalid Query Detected");
               });
           });
-          it("GET will return a status 200 and return the sort_by column defaulted in descending order when querying order with a value that isn't 'asc' or 'desc'", () => {
+          it("GET will return a status 400 and return the sort_by column defaulted in descending order when querying order with a value that isn't 'asc' or 'desc'", () => {
             return request(app)
               .get("/api/articles/1/comments?sort_by=votes&order=chaos")
-              .expect(200)
+              .expect(400)
               .then(({ body }) => {
-                expect(body.comments).to.be.descendingBy("votes");
+                expect(body.msg).to.equal("Invalid order Input");
               });
           });
         });
