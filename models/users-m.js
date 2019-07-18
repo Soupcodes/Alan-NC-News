@@ -9,7 +9,7 @@ const selectUser = username => {
       if (!user.length) {
         return Promise.reject({ status: 404, msg: "User not found" });
       } else {
-        return user;
+        return user[0];
       }
     });
 };

@@ -62,7 +62,7 @@ describe("/API", () => {
             .get("/api/users/lurker")
             .expect(200)
             .then(({ body }) => {
-              expect(body.user[0]).to.have.keys(
+              expect(body.user).to.have.keys(
                 "username",
                 "avatar_url",
                 "name"
@@ -72,7 +72,6 @@ describe("/API", () => {
       });
 
       describe("Get errors", () => {
-        //SQL won't flag an error as the input is valid, it will return an empty array
         it("GET /non-existent-user will return a status 404 and an error message", () => {
           return request(app)
             .get("/api/users/soup")
@@ -273,7 +272,7 @@ describe("/API", () => {
             .expect(400)
             .then(({ body }) => {
               expect(body.status).to.equal(400);
-              expect(body.msg).to.equal("Invalid Query Detected");
+              expect(body.msg).to.equal("Invalid Input Detected");
             });
         });
         it("GET will return an error if provided an author that doesn't exist in the query", () => {
@@ -457,13 +456,13 @@ describe("/API", () => {
               expect(body.status).to.equal(400);
             });
         });
-        it('PATCH will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
+        it.only('PATCH will return a status 400 and a bad request error when "inc_votes isn\'t used as the key of the post"', () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ change_votes: 1 })
             .expect(400)
             .then(({ body }) => {
-              expect(body.msg).to.equal("Bad request");
+              expect(body.msg).to.equal("Invalid Input Detected");
               expect(body.status).to.equal(400);
             });
         });
@@ -518,32 +517,6 @@ describe("/API", () => {
         });
 
         describe("Post errors", () => {
-          it("POST will return a status 400 and a bad request error message when posting a comment where the username is not in string format", () => {
-            return request(app)
-              .post("/api/articles/1/comments")
-              .send({
-                username: 123,
-                body: "I can't see the light behind the shadow!"
-              })
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.status).to.equal(400);
-                expect(body.msg).to.equal("Invalid Input Detected");
-              });
-          });
-          it("POST will return a status 400 and a bad request error message when posting a comment where the body is not in string format", () => {
-            return request(app)
-              .post("/api/articles/1/comments")
-              .send({
-                username: "soup",
-                body: 1234567890
-              })
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.status).to.equal(400);
-                expect(body.msg).to.equal("Invalid Input Detected");
-              });
-          });
           it("POST will return a status 400 and a bad request error message when posting a comment to an article_id that isn't an id ", () => {
             return request(app)
               .post("/api/articles/thou-shalt-not-pass/comments")
@@ -557,6 +530,19 @@ describe("/API", () => {
                 expect(body.msg).to.equal("Invalid Input Detected");
               });
           });
+          it("POST will return a status 404 and an id doesn't exist error message when posting a comment to an article_id that doesn't exist", () => {
+            return request(app)
+              .post("/api/articles/0/comments")
+              .send({
+                username: "soup",
+                body: "I can't see the light behind the shadow!"
+              })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.status).to.equal(404);
+                expect(body.msg).to.equal("Not Found");
+              });
+          });
           it('POST will return a status 400 and a bad request error when "username" isn\'t used as the key of the post', () => {
             return request(app)
               .post("/api/articles/1/comments")
@@ -566,7 +552,7 @@ describe("/API", () => {
               })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.msg).to.equal("Post error, please try again");
                 expect(body.status).to.equal(400);
               });
           });
@@ -579,7 +565,7 @@ describe("/API", () => {
               })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.msg).to.equal("Post error, please try again");
                 expect(body.status).to.equal(400);
               });
           });
@@ -589,7 +575,7 @@ describe("/API", () => {
               .send({ username: "soup" })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.msg).to.equal("Post error, please try again");
                 expect(body.status).to.equal(400);
               });
           });
@@ -601,7 +587,7 @@ describe("/API", () => {
               })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.msg).to.equal("Post error, please try again");
                 expect(body.status).to.equal(400);
               });
           });
@@ -614,7 +600,7 @@ describe("/API", () => {
               })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.msg).to.equal("Post error, please try again");
                 expect(body.status).to.equal(400);
               });
           });
@@ -627,7 +613,7 @@ describe("/API", () => {
               })
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).to.equal("Invalid Input Detected");
+                expect(body.msg).to.equal("Post error, please try again");
                 expect(body.status).to.equal(400);
               });
           });
@@ -884,7 +870,7 @@ describe("/API", () => {
               .expect(400)
               .then(({ body }) => {
                 expect(body.status).to.equal(400);
-                expect(body.msg).to.equal("Invalid Query Detected");
+                expect(body.msg).to.equal("Invalid Input Detected");
               });
           });
           it("GET will return a status 400 when attempting to query sort to a parametric endpoint that doesn't exist", () => {
@@ -893,7 +879,7 @@ describe("/API", () => {
               .expect(400)
               .then(({ body }) => {
                 expect(body.status).to.equal(400);
-                expect(body.msg).to.equal("Invalid Query Detected");
+                expect(body.msg).to.equal("Invalid Input Detected");
               });
           });
           it("GET will return a status 400 when attempting to query sort to a parametric endpoint that of invalid input", () => {
@@ -902,7 +888,7 @@ describe("/API", () => {
               .expect(400)
               .then(({ body }) => {
                 expect(body.status).to.equal(400);
-                expect(body.msg).to.equal("Invalid Query Detected");
+                expect(body.msg).to.equal("Invalid Input Detected");
               });
           });
           it("GET will return a status 400 and return the sort_by column defaulted in descending order when querying order with a value that isn't 'asc' or 'desc'", () => {

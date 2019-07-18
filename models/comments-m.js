@@ -34,7 +34,17 @@ const selectCommentsByArticleId = (
 };
 
 const insertCommentByArticleId = (article_id, req) => {
-  if (Object.keys(req).length > 2) {
+  if (!req.username) {
+    return Promise.reject({
+      status: 400,
+      msg: "Post error, please try again"
+    });
+  } else if (!req.body) {
+    return Promise.reject({
+      status: 400,
+      msg: "Post error, please try again"
+    });
+  } else if (Object.keys(req).length > 2 || !req.body.length) {
     return Promise.reject({
       status: 400,
       msg: "Post error, please try again"
@@ -42,11 +52,17 @@ const insertCommentByArticleId = (article_id, req) => {
   } else {
     const { username, body } = req;
     const author = username;
-    const formattedComment = { article_id, author, body };
+    const formattedComment = {
+      article_id,
+      author,
+      body
+    };
     return connection
       .insert(formattedComment)
       .into("comments")
-      .where({ "comments.article_id": article_id })
+      .where({
+        "comments.article_id": article_id
+      })
       .returning("*")
       .then(comment => {
         return comment[0];
@@ -54,7 +70,7 @@ const insertCommentByArticleId = (article_id, req) => {
   }
 };
 
-const updateComment = (comment_id, inc_votes) => {
+const updateComment = (comment_id, inc_votes = 0) => {
   if (inc_votes === undefined) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {

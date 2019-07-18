@@ -13,14 +13,14 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handleSqlErrors = (err, req, res, next) => {
-  const errCodes = ["23502", "23503", "22P02"];
+  const errCodes = ["23502", "42703", "22P02"];
   errCodes.map(code => {
     if (err.code === code) {
       res.status(400).send({ status: 400, msg: "Invalid Input Detected" });
     }
   });
-  if (err.code === "42703") {
-    res.status(400).send({ status: 400, msg: "Invalid Query Detected" });
+  if (err.code === "23503") {
+    res.status(404).send({ status: 404, msg: "Not Found" });
   } else next(err);
 };
 
