@@ -11,9 +11,16 @@ describe("/API", () => {
   beforeEach(() => connection.seed.run());
   after(() => connection.destroy());
 
-  // describe("/", () => {
-  //   it("will return a JSON file describing all the available endpoints on this API", () => {});
-  // });
+  describe("/", () => {
+    it("will return a JSON file describing all the available endpoints on this API", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.endpoints).to.be.an("object");
+        });
+    });
+  });
 
   describe("/ROUTE-NOT-FOUND", () => {
     describe("Error", () => {
@@ -57,12 +64,12 @@ describe("/API", () => {
   describe("/USERS", () => {
     describe("/:USERNAME", () => {
       describe("Get requests", () => {
-        it.only("GET /:username will connect to the username endpoint and return a user object with all their properties", () => {
+        it("GET /:username will connect to the username endpoint and return a user object with all their properties", () => {
           return request(app)
             .get("/api/users/lurker")
             .expect(200)
             .then(({ body }) => {
-              console.log(body)
+              console.log(body);
               expect(body.user).to.have.keys("username", "avatar_url", "name");
             });
         });
