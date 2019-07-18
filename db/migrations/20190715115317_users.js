@@ -3,7 +3,8 @@ exports.up = function(connectToDB) {
     usersTable
       .string("username")
       .unique()
-      .primary();
+      .primary()
+      .notNullable();
     usersTable.string("avatar_url");
     usersTable.string("name");
   });

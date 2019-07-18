@@ -9,8 +9,6 @@ app.use("/api", apiRouter);
 
 app.use("/*", routeNotFound);
 app.use(customErrors);
-app.use(sqlErrors)
-
-// app.use(internalServerError);
+app.use(sqlErrors);
 
 module.exports = app;

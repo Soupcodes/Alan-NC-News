@@ -2,7 +2,6 @@
 
 exports.up = function(connectToDB) {
   return connectToDB.schema.createTable("topics", topicsTable => {
-    // topicsTable.increments("topic_id");
     topicsTable
       .string("slug")
       .unique()

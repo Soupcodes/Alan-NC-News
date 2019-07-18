@@ -9,7 +9,6 @@ const sendCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   selectCommentsByArticleId(article_id, req.query)
     .then(comments => {
-      // console.log(comments);
       res.status(200).send({ comments });
     })
     .catch(next);
@@ -34,7 +33,6 @@ const patchCommentByCommentId = (req, res, next) => {
 };
 
 const removeComment = (req, res, next) => {
-  console.log(req.query);
   const { comment_id } = req.params;
   delCommentFromDb(comment_id)
     .then(deleted => {
