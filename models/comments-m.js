@@ -1,4 +1,5 @@
 const connection = require("../db/connection");
+const { selectArticleByArticleId } = require("./articles-m");
 
 exports.selectCommentsByArticleId = (
   article_id,
@@ -10,21 +11,25 @@ exports.selectCommentsByArticleId = (
     }
     return connection
       .select(
-        "articles.article_id",
+        "comments.article_id",
         "comment_id",
         "comments.votes",
         "comments.created_at",
         "comments.body",
         "comments.author"
       )
-      .from("articles")
-      .leftJoin("comments", "articles.article_id", "comments.article_id")
+      .from("comments")
+      .leftJoin("articles", "articles.article_id", "comments.article_id")
       .join("users", "users.username", "articles.author")
       .where({ "articles.article_id": article_id })
       .orderBy(sort_by, order)
       .then(comments => {
+        const checkArticleExists = selectArticleByArticleId(article_id);
         if (!comments.length) {
-          return Promise.reject({ status: 404, msg: "Article not found" });
+          return Promise.all([checkArticleExists]).then(([ifItExists]) => {
+            if (ifItExists) return comments;
+            else return Promise.reject(ifItExists);
+          });
         }
         return comments;
       });

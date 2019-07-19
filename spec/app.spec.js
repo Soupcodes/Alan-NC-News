@@ -669,16 +669,7 @@ describe("/API", () => {
               .get("/api/articles/2/comments")
               .expect(200)
               .then(({ body }) => {
-                expect(body.comments[0]).to.have.keys(
-                  "article_id",
-                  "comment_id",
-                  "votes",
-                  "created_at",
-                  "author",
-                  "body"
-                );
-                expect(body.comments[0].article_id).to.equal(2);
-                expect(body.comments.length).to.equal(1);
+                expect(body.comments).to.be.eql([]);
               });
           });
           it("GET will return a status 200 and DEFAULT sort the array by the date at which comments are created for an article_id in descending order", () => {
