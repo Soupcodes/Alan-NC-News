@@ -3,7 +3,7 @@ const { selectArticleByArticleId } = require("./articles-m");
 
 exports.selectCommentsByArticleId = (
   article_id,
-  { sort_by = "created_at", order = "desc" }
+  { sort_by = "created_at", order = "desc", limit = 10, p = 1 }
 ) => {
   if (order === "asc" || order === "desc") {
     if (sort_by === "article_id") {
@@ -23,9 +23,19 @@ exports.selectCommentsByArticleId = (
       .join("users", "users.username", "articles.author")
       .where({ "articles.article_id": article_id })
       .orderBy(sort_by, order)
+      .modify(query => {
+        if (!/[A-Za-z_]/gi.test(limit)) {
+          query.limit(limit);
+        } else {
+          query.limit(10);
+        }
+        if (p) query.offset((p - 1) * limit);
+      })
       .then(comments => {
         const checkArticleExists = selectArticleByArticleId(article_id);
-        if (!comments.length) {
+        if (/[A-Za-z_]/gi.test(p)) {
+          return Promise.reject({ status: 400, msg: "Invalid page Input" });
+        } else if (!comments.length) {
           return Promise.all([checkArticleExists]).then(([ifItExists]) => {
             if (ifItExists) return comments;
             else return Promise.reject(ifItExists);

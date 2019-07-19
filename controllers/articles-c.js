@@ -24,8 +24,6 @@ exports.patchArticleVotes = (req, res, next) => {
 };
 
 exports.sendArticles = (req, res, next) => {
-  const { limit, p } = req.query;
-  console.log(limit, p);
   selectArticles(req.query)
     .then(articles => {
       res.status(200).send({ articles });

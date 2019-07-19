@@ -13,15 +13,19 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handleSqlErrors = (err, req, res, next) => {
-  const errCodes = ["23502", "42703", "22P02"];
-  errCodes.map(code => {
+  const errCodes400 = ["23502", "42703", "22P02"];
+  const errCodes404 = ["23503", "2201X"];
+  errCodes400.map(code => {
     if (err.code === code) {
       res.status(400).send({ status: 400, msg: "Invalid Input Detected" });
     }
   });
-  if (err.code === "23503") {
-    res.status(404).send({ status: 404, msg: "Not Found" });
-  } else next(err);
+  errCodes404.map(code => {
+    if (err.code === code) {
+      res.status(404).send({ status: 404, msg: "Not Found" });
+    }
+  });
+  next(err);
 };
 
 exports.handleInternalServerError = (err, req, res, next) => {

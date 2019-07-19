@@ -124,8 +124,6 @@ describe("/API", () => {
             .expect(200)
             .then(({ body }) => {
               expect(body.articles).to.be.descendingBy("author");
-              expect(body.articles[0].author).to.equal("rogersop");
-              expect(body.articles[11].author).to.equal("butter_bridge");
             });
         });
         it("GET will return the articles array, sorted by the title in descending alphabetical order by default", () => {
@@ -135,7 +133,6 @@ describe("/API", () => {
             .then(({ body }) => {
               expect(body.articles).to.be.descendingBy("title");
               expect(body.articles[0].title).to.equal("Z");
-              expect(body.articles[11].title).to.equal("A");
             });
         });
         it("GET will return the articles array, sorted by the topic in descending alphabetical order by default", () => {
@@ -145,7 +142,6 @@ describe("/API", () => {
             .then(({ body }) => {
               expect(body.articles).to.be.descendingBy("topic");
               expect(body.articles[0].topic).to.equal("mitch");
-              expect(body.articles[11].topic).to.equal("cats");
             });
         });
         it("GET will return the articles array, sorted by the votes in descending order by default", () => {
@@ -162,7 +158,6 @@ describe("/API", () => {
             .expect(200)
             .then(({ body }) => {
               expect(+body.articles[0].comment_count).to.equal(13);
-              expect(+body.articles[11].comment_count).to.equal(0);
             });
         });
         it("GET will return the articles array, sorting and ordering the date in ascending order", () => {
@@ -188,7 +183,6 @@ describe("/API", () => {
             .then(({ body }) => {
               expect(body.articles).to.be.ascendingBy("author");
               expect(body.articles[0].author).to.equal("butter_bridge");
-              expect(body.articles[11].author).to.equal("rogersop");
             });
         });
         it("GET will return the articles array, sorting and ordering the title in ascending alphabetical order", () => {
@@ -198,7 +192,6 @@ describe("/API", () => {
             .then(({ body }) => {
               expect(body.articles).to.be.ascendingBy("title");
               expect(body.articles[0].title).to.equal("A");
-              expect(body.articles[11].title).to.equal("Z");
             });
         });
         it("GET will return the articles array, sorting and ordering the topic in ascending alphabetical order", () => {
@@ -208,7 +201,6 @@ describe("/API", () => {
             .then(({ body }) => {
               expect(body.articles).to.be.ascendingBy("topic");
               expect(body.articles[0].topic).to.equal("cats");
-              expect(body.articles[11].topic).to.equal("mitch");
             });
         });
         it("GET will return the articles array, sorting and ordering the votes in ascending order", () => {
@@ -225,7 +217,6 @@ describe("/API", () => {
             .expect(200)
             .then(({ body }) => {
               expect(+body.articles[0].comment_count).to.equal(0);
-              expect(+body.articles[11].comment_count).to.equal(13);
             });
         });
         it("GET will return the articles array, filtered by the username (articles.author) provided in the query", () => {
@@ -248,7 +239,7 @@ describe("/API", () => {
               });
             });
         });
-        describe.only("PAGINATION", () => {
+        describe("Pagination", () => {
           it("will by default limit the number of responses returned back to the client to 10 articles", () => {
             return request(app)
               .get("/api/articles")
@@ -289,6 +280,40 @@ describe("/API", () => {
                   votes: 0,
                   comment_count: "1"
                 });
+              });
+          });
+          it("will return a status 200 and default back to the limit of 10 if the user enters value into the limit query which is not an integer", () => {
+            return request(app)
+              .get("/api/articles?limit=eight")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.articles).to.have.lengthOf(10);
+              });
+          });
+        });
+        describe("Pagination errors", () => {
+          it("will return a status 404 if the p query is too high and there are no further pages to display", () => {
+            return request(app)
+              .get("/api/articles?p=5")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Articles not found");
+              });
+          });
+          it("will return a status 404 if the p query is negative", () => {
+            return request(app)
+              .get("/api/articles?p=-1")
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Not Found");
+              });
+          });
+          it("will return a status 400 if the p query is is not an integer", () => {
+            return request(app)
+              .get("/api/articles?p=two")
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).to.equal("Invalid page Input");
               });
           });
         });
@@ -705,7 +730,6 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.descendingBy("created_at");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
               });
           });
           it("GET will return a status 200 and accepts a query to sort the article_id column the array, sorting by article_id will sort by created at in descending order as only 1 article id will be pulled on any one request", () => {
@@ -716,7 +740,6 @@ describe("/API", () => {
                 expect(body.comments).to.be.sortedBy("article_id");
                 expect(body.comments).to.be.descendingBy("created_at");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
               });
           });
           it("GET will return a status 200 and accepts a query to sort the comment_id column of the array, defaulted to descending order", () => {
@@ -726,7 +749,7 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.descendingBy("comment_id");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to sort the author column of the array, defaulting sort_by to 'created_at' in descending order as there is only one article author value", () => {
@@ -736,8 +759,7 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.descendingBy("author");
                 expect(body.comments[0].author).to.equal("icellusedkars");
-                expect(body.comments[12].author).to.equal("butter_bridge");
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to sort the votes column of the array, default sorting in descending order", () => {
@@ -747,7 +769,7 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.descendingBy("votes");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to sort the body column of the array", () => {
@@ -763,16 +785,8 @@ describe("/API", () => {
                   body: "This morning, I showered for nine minutes.",
                   author: "butter_bridge"
                 });
-                expect(body.comments[12]).to.eql({
-                  article_id: 1,
-                  comment_id: 11,
-                  votes: 0,
-                  created_at: "2007-11-25T12:36:03.389Z",
-                  body: "Ambidextrous marsupial",
-                  author: "icellusedkars"
-                });
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to order the article_id column in ascending order, sort_by author will sort_by created at", () => {
@@ -783,7 +797,7 @@ describe("/API", () => {
                 expect(body.comments).to.be.sortedBy("article_id");
                 expect(body.comments).to.be.ascendingBy("created_at");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to order the comment_id column of the array in ascending order", () => {
@@ -793,7 +807,7 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.ascendingBy("comment_id");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to order the author column in ascending order, defaulting sort_by to 'created_at' as there is only one article author value", () => {
@@ -803,7 +817,7 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.sortedBy("author");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to order the votes column in ascending order", () => {
@@ -813,7 +827,7 @@ describe("/API", () => {
               .then(({ body }) => {
                 expect(body.comments).to.be.ascendingBy("votes");
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and accepts a query to sort the body column of the array", () => {
@@ -829,16 +843,8 @@ describe("/API", () => {
                   body: "Ambidextrous marsupial",
                   author: "icellusedkars"
                 });
-                expect(body.comments[12]).to.eql({
-                  article_id: 1,
-                  comment_id: 18,
-                  votes: 16,
-                  created_at: "2000-11-26T12:36:03.389Z",
-                  body: "This morning, I showered for nine minutes.",
-                  author: "butter_bridge"
-                });
                 expect(body.comments[0].article_id).to.equal(1);
-                expect(body.comments.length).to.equal(13);
+                expect(body.comments.length).to.equal(10);
               });
           });
           it("GET will return a status 200 and return the default array with the relevant sort and order defaults when attempting to query a sort key does not equal sort_by", () => {
@@ -874,6 +880,84 @@ describe("/API", () => {
                   author: "butter_bridge"
                 });
               });
+          });
+          describe("Pagination", () => {
+            it("GET will return a status 200 and an array of comments defaultly limited to the 10 for the specified article_id", () => {
+              return request(app)
+                .get("/api/articles/1/comments")
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments[0]).to.have.keys(
+                    "article_id",
+                    "comment_id",
+                    "votes",
+                    "created_at",
+                    "author",
+                    "body"
+                  );
+                  expect(body.comments[0].article_id).to.equal(1);
+                  expect(body.comments).to.have.lengthOf(10);
+                });
+            });
+
+            it("will accept a limit query which limits the number of comment responses returned back to the client", () => {
+              return request(app)
+                .get("/api/articles/1/comments?limit=8")
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).to.have.lengthOf(8);
+                });
+            });
+            it("will accept a p (page) query which specifies which page number the responses returned back to the client should begin", () => {
+              return request(app)
+                .get("/api/articles/1/comments?limit=5&p=2")
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).to.have.lengthOf(5);
+                  expect(body.comments[0]).to.eql({
+                    article_id: 1,
+                    comment_id: 7,
+                    votes: 0,
+                    created_at: "2011-11-24T12:36:03.389Z",
+                    body: "Lobster pot",
+                    author: "icellusedkars"
+                  });
+                });
+            });
+            it("will return a status 200 and default back to the limit of 10 if the user enters value into the limit query which is not an integer", () => {
+              return request(app)
+                .get("/api/articles/1/comments?limit=eight")
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).to.have.lengthOf(10);
+                });
+            });
+            it("will return a status 200 and an empty array of comments if the article exists but the p query is too high and there are no further pages to display", () => {
+              return request(app)
+                .get("/api/articles/1/comments?p=5")
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).to.have.lengthOf(0);
+                });
+            });
+          });
+          describe("Pagination errors", () => {
+            it("will return a status 400 if the p query is not an integer", () => {
+              return request(app)
+                .get("/api/articles/1/comments?p=two")
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.msg).to.equal("Invalid page Input");
+                });
+            });
+            it("will return a status 404 if the p query is a  negative integer", () => {
+              return request(app)
+                .get("/api/articles/1/comments?p=-1")
+                .expect(404)
+                .then(({ body }) => {
+                  expect(body.msg).to.equal("Not Found");
+                });
+            });
           });
         });
 

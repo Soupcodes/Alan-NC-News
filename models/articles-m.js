@@ -44,7 +44,7 @@ exports.selectArticles = ({
   author,
   topic,
   limit = 10,
-  p
+  p = 1
 }) => {
   if (order === "asc" || order === "desc") {
     return connection
@@ -60,19 +60,23 @@ exports.selectArticles = ({
       .from("articles")
       .leftJoin("comments", "articles.article_id", "comments.article_id")
       .orderBy(sort_by, order)
-      .limit(limit)
       .groupBy("articles.article_id")
       .modify(query => {
         if (author) query.where({ "articles.author": author });
         if (topic) query.where({ "articles.topic": topic });
+        if (!/[A-Za-z_]/gi.test(limit)) {
+          query.limit(limit);
+        } else {
+          query.limit(10);
+        }
         if (p) query.offset((p - 1) * limit);
       })
       .then(articles => {
-        if (!articles.length) {
+        if (/[A-Za-z_]/gi.test(p)) {
+          return Promise.reject({ status: 400, msg: "Invalid page Input" });
+        } else if (!articles.length) {
           return Promise.reject({ status: 404, msg: "Articles not found" });
-        } else {
-          return articles;
-        }
+        } else return articles;
       });
   } else {
     return Promise.reject({ status: 400, msg: "Invalid order Input" });
