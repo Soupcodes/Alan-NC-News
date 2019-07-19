@@ -10,10 +10,12 @@ The following steps outline how to get the repository running on your local mach
 
 ## 1 - Clone the repository
 
+From your terminal, clone the repository to your desired folder
+
 ```bash
 # git clone https://github.com/Soupcodes/Alan-NC-News.git
 
-from your terminal to your desired folder and cd Alan-NC-News
+# cd Alan-NC-News
 ```
 
 ### 1a - Create your own repository
@@ -188,3 +190,56 @@ GET `/api/categories` is not a valid endpoint so the test ensures it returns an 
 ```
 
 _A list of all the available endpoints can be found in the endpoints.json file_
+
+## 5 - Deployment
+
+This app was hosted on `Heroku` but there are various hosting platforms that can be utilised to run your code. They must, however, need to be able to handle database integration through Postgres for this particular api.
+
+### 1. Install Heroku CLI
+
+`On mac`
+
+```bash
+brew tap heroku/brew && brew install heroku
+```
+
+`On Linux`
+
+```bash
+sudo snap install --classic heroku
+```
+
+### 2. Create a Heroku app
+
+```bash
+- heroku login
+- heroku create <your-app-name>
+```
+
+This will add a new remote that you can push your code to which you can check by entering:
+
+```bash
+git remote -v
+```
+
+Push your code to Heroku once it shows up in your git remotes. Any subsequent changes can also be pushed up.
+
+```bash
+git push heroku master
+```
+
+### 3. Seed deployed database
+
+All heroku's custom settings have already configured in the repo so to populate the production database, run the following command built into the package.json:
+
+```bash
+npm run seed:prod
+```
+
+### 4. Debugging Heroku
+
+Any issues with deployment on Heroku can be debugged using
+
+```bash
+heroku logs --tail
+```
