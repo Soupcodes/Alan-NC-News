@@ -1,6 +1,6 @@
 const { selectUser } = require("../models/users-m");
 
-const sendUser = (req, res, next) => {
+exports.sendUser = (req, res, next) => {
   const { username } = req.params;
   selectUser(username)
     .then(user => {
@@ -8,5 +8,3 @@ const sendUser = (req, res, next) => {
     })
     .catch(next);
 };
-
-module.exports = { sendUser };

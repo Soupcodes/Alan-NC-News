@@ -1,6 +1,6 @@
 const connection = require("../db/connection");
 
-const selectArticleByArticleId = article_id => {
+exports.selectArticleByArticleId = article_id => {
   return connection
     .select("articles.*")
     .count({ comment_count: "comment_id" })
@@ -17,7 +17,7 @@ const selectArticleByArticleId = article_id => {
     });
 };
 
-const updateArticleVotes = (article_id, inc_votes) => {
+exports.updateArticleVotes = (article_id, inc_votes) => {
   if (inc_votes === undefined) {
     return Promise.reject({ status: 400, msg: "Invalid Input Detected" });
   } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {
@@ -38,7 +38,7 @@ const updateArticleVotes = (article_id, inc_votes) => {
     });
 };
 
-const selectArticles = ({
+exports.selectArticles = ({
   sort_by = "created_at",
   order = "desc",
   author,
@@ -73,10 +73,4 @@ const selectArticles = ({
   } else {
     return Promise.reject({ status: 400, msg: "Invalid order Input" });
   }
-};
-
-module.exports = {
-  selectArticleByArticleId,
-  updateArticleVotes,
-  selectArticles
 };

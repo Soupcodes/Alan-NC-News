@@ -4,7 +4,7 @@ const {
   selectArticles
 } = require("../models/articles-m");
 
-const sendArticleByArticleId = (req, res, next) => {
+exports.sendArticleByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   selectArticleByArticleId(article_id)
     .then(article => {
@@ -13,7 +13,7 @@ const sendArticleByArticleId = (req, res, next) => {
     .catch(next);
 };
 
-const patchArticleVotes = (req, res, next) => {
+exports.patchArticleVotes = (req, res, next) => {
   const { article_id } = req.params;
   const { inc_votes } = req.body;
   updateArticleVotes(article_id, inc_votes)
@@ -23,12 +23,10 @@ const patchArticleVotes = (req, res, next) => {
     .catch(next);
 };
 
-const sendArticles = (req, res, next) => {
+exports.sendArticles = (req, res, next) => {
   selectArticles(req.query)
     .then(articles => {
       res.status(200).send({ articles });
     })
     .catch(next);
 };
-
-module.exports = { sendArticleByArticleId, patchArticleVotes, sendArticles };

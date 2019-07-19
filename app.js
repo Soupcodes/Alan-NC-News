@@ -15,7 +15,6 @@ app.use("/api", apiRouter);
 app.use("/*", routeNotFound);
 app.use(handleCustomErrors);
 app.use(handleSqlErrors);
-
 app.use(handleInternalServerError);
 
 module.exports = app;

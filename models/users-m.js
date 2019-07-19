@@ -1,6 +1,6 @@
 const connection = require("../db/connection");
 
-const selectUser = username => {
+exports.selectUser = username => {
   return connection
     .select("*")
     .from("users")
@@ -13,5 +13,3 @@ const selectUser = username => {
       }
     });
 };
-
-module.exports = { selectUser };

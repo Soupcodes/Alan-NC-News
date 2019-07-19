@@ -5,7 +5,7 @@ const {
   delCommentFromDb
 } = require("../models/comments-m");
 
-const sendCommentsByArticleId = (req, res, next) => {
+exports.sendCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   selectCommentsByArticleId(article_id, req.query)
     .then(comments => {
@@ -14,7 +14,7 @@ const sendCommentsByArticleId = (req, res, next) => {
     .catch(next);
 };
 
-const postCommentByArticleId = (req, res, next) => {
+exports.postCommentByArticleId = (req, res, next) => {
   const { article_id } = req.params;
   insertCommentByArticleId(article_id, req.body)
     .then(comment => {
@@ -23,7 +23,7 @@ const postCommentByArticleId = (req, res, next) => {
     .catch(next);
 };
 
-const patchCommentByCommentId = (req, res, next) => {
+exports.patchCommentByCommentId = (req, res, next) => {
   const { comment_id } = req.params;
   const { inc_votes } = req.body;
   updateComment(comment_id, inc_votes)
@@ -33,7 +33,7 @@ const patchCommentByCommentId = (req, res, next) => {
     .catch(next);
 };
 
-const removeComment = (req, res, next) => {
+exports.removeComment = (req, res, next) => {
   const { comment_id } = req.params;
   delCommentFromDb(comment_id)
     .then(deleted => {
@@ -47,11 +47,4 @@ const removeComment = (req, res, next) => {
       }
     })
     .catch(next);
-};
-
-module.exports = {
-  sendCommentsByArticleId,
-  postCommentByArticleId,
-  patchCommentByCommentId,
-  removeComment
 };

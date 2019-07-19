@@ -1,6 +1,6 @@
 const connection = require("../db/connection");
 
-const selectCommentsByArticleId = (
+exports.selectCommentsByArticleId = (
   article_id,
   { sort_by = "created_at", order = "desc" }
 ) => {
@@ -33,36 +33,19 @@ const selectCommentsByArticleId = (
   }
 };
 
-const insertCommentByArticleId = (article_id, req) => {
-  if (!req.username) {
-    return Promise.reject({
-      status: 400,
-      msg: "Post error, please try again"
-    });
-  } else if (!req.body) {
-    return Promise.reject({
-      status: 400,
-      msg: "Post error, please try again"
-    });
+exports.insertCommentByArticleId = (article_id, req) => {
+  const { username, body } = req;
+  const author = username;
+  const rejError = { status: 400, msg: "Post error, please try again" };
+  if (!req.username || !req.body) {
+    return Promise.reject(rejError);
   } else if (Object.keys(req).length > 2 || !req.body.length) {
-    return Promise.reject({
-      status: 400,
-      msg: "Post error, please try again"
-    });
+    return Promise.reject(rejError);
   } else {
-    const { username, body } = req;
-    const author = username;
-    const formattedComment = {
-      article_id,
-      author,
-      body
-    };
     return connection
-      .insert(formattedComment)
+      .insert({ article_id, author, body })
       .into("comments")
-      .where({
-        "comments.article_id": article_id
-      })
+      .where({ "comments.article_id": article_id })
       .returning("*")
       .then(comment => {
         return comment[0];
@@ -70,7 +53,7 @@ const insertCommentByArticleId = (article_id, req) => {
   }
 };
 
-const updateComment = (comment_id, inc_votes) => {
+exports.updateComment = (comment_id, inc_votes) => {
   if (inc_votes === undefined) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   } else if (typeof inc_votes !== "number" && inc_votes.length < 1) {
@@ -91,17 +74,10 @@ const updateComment = (comment_id, inc_votes) => {
     });
 };
 
-const delCommentFromDb = comment_id => {
+exports.delCommentFromDb = comment_id => {
   return connection
     .delete()
     .from("comments")
     .where({ comment_id })
     .returning("*");
-};
-
-module.exports = {
-  selectCommentsByArticleId,
-  insertCommentByArticleId,
-  updateComment,
-  delCommentFromDb
 };
