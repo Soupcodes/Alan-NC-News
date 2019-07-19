@@ -42,7 +42,9 @@ exports.selectArticles = ({
   sort_by = "created_at",
   order = "desc",
   author,
-  topic
+  topic,
+  limit = 10,
+  p
 }) => {
   if (order === "asc" || order === "desc") {
     return connection
@@ -58,10 +60,12 @@ exports.selectArticles = ({
       .from("articles")
       .leftJoin("comments", "articles.article_id", "comments.article_id")
       .orderBy(sort_by, order)
+      .limit(limit)
       .groupBy("articles.article_id")
       .modify(query => {
         if (author) query.where({ "articles.author": author });
         if (topic) query.where({ "articles.topic": topic });
+        if (p) query.offset((p - 1) * limit);
       })
       .then(articles => {
         if (!articles.length) {

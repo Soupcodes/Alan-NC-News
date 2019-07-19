@@ -1,7 +1,6 @@
 process.env.NODE_ENV = "test";
 const chai = require("chai");
 const { expect } = chai;
-
 chai.use(require("chai-sorted"));
 const request = require("supertest");
 const app = require("../app");
@@ -103,23 +102,6 @@ describe("/API", () => {
   describe("/ARTICLES", () => {
     describe("/", () => {
       describe("Get requests", () => {
-        it("GET will connect to the articles endpoint and return an array of all the articles", () => {
-          return request(app)
-            .get("/api/articles")
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.articles[0]).to.have.keys(
-                "author",
-                "title",
-                "article_id",
-                "topic",
-                "created_at",
-                "votes",
-                "comment_count"
-              );
-              expect(+body.articles[0].comment_count).to.equal(13);
-            });
-        });
         it("GET will return the articles array, defaulted to sort by the date in descending order", () => {
           return request(app)
             .get("/api/articles")
@@ -265,6 +247,50 @@ describe("/API", () => {
                 expect(article.topic).to.equal("mitch");
               });
             });
+        });
+        describe.only("PAGINATION", () => {
+          it("will by default limit the number of responses returned back to the client to 10 articles", () => {
+            return request(app)
+              .get("/api/articles")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.articles[0]).to.have.keys(
+                  "author",
+                  "title",
+                  "article_id",
+                  "topic",
+                  "created_at",
+                  "votes",
+                  "comment_count"
+                );
+                expect(body.articles).to.have.lengthOf(10);
+              });
+          });
+          it("will accept a limit query which limits the number of responses returned back to the client", () => {
+            return request(app)
+              .get("/api/articles?limit=8")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.articles).to.have.lengthOf(8);
+              });
+          });
+          it("will accept a p (page) query which specifies which page number the responses returned back to the client should begin", () => {
+            return request(app)
+              .get("/api/articles?limit=5&p=2")
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.articles).to.have.lengthOf(5);
+                expect(body.articles[0]).to.eql({
+                  author: "icellusedkars",
+                  title: "A",
+                  article_id: 6,
+                  topic: "mitch",
+                  created_at: "1998-11-20T12:21:54.171Z",
+                  votes: 0,
+                  comment_count: "1"
+                });
+              });
+          });
         });
       });
 
