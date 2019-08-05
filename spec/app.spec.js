@@ -357,7 +357,7 @@ describe("/API", () => {
 
       describe("Method errors", () => {
         it("UNSPECIFIED METHODS will return a status 405 error", () => {
-          const invalidMethods = ["post", "put", "delete", "patch"];
+          const invalidMethods = ["post", "put", "patch"];
           const returnError = invalidMethods.map(method => {
             return request(app)
               [method]("/api/articles")
@@ -531,6 +531,35 @@ describe("/API", () => {
             });
         });
       });
+
+      describe("Delete requests", () => {
+        it("DELETE of a valid article id will return a status 204", () => {
+          return request(app)
+            .delete("/api/articles/1")
+            .expect(204);
+        });
+      });
+      //   describe("Delete errors", () => {
+      //     it("DELETE of an invalid comment id will return an error message as nothing will have been deleted", () => {
+      //       return request(app)
+      //         .delete("/api/comments/100")
+      //         .expect(404)
+      //         .then(({ body }) => {
+      //           expect(body.msg).to.equal(
+      //             "Comment not found, nothing was deleted"
+      //           );
+      //           expect(body.status).to.equal(404);
+      //         });
+      //     });
+      //     it("DELETE of a comment id that is not in integer format will return a code 400 and bad request error message as nothing will have been accessed", () => {
+      //       return request(app)
+      //         .delete("/api/comments/not-an-id")
+      //         .expect(400)
+      //         .then(({ body }) => {
+      //           expect(body.msg).to.equal("Invalid Input Detected");
+      //           expect(body.status).to.equal(400);
+      //         });
+      //     });
 
       describe("Method errors", () => {
         it("UNSPECIFIED METHODS will return a status 405 error", () => {
