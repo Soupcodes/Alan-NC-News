@@ -71,7 +71,6 @@ describe("formatDates", () => {
         author: "icellusedkars",
         body: "some gifs",
         created_at: new Date(article[1].created_at)
-        // votes: 0
       }
     ];
     expect(formatDates(article)).to.eql(expected);

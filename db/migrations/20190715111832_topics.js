@@ -1,5 +1,3 @@
-// const connectToDB = require("knex");
-
 exports.up = function(connectToDB) {
   return connectToDB.schema.createTable("topics", topicsTable => {
     topicsTable
